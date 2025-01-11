@@ -1,18 +1,8 @@
-# BsShitbot
+# BlueSky🦋 Shit💩 Bot🤖
 
-To start your Phoenix server:
+I wanted to start to use BlueSky but found that a large portion of users that are following me are not real and dishonest.
+A common trait is their following count is large and typically in the thosands, and their average post/follower counts are less than 10.
+They are likely farming your content, trying to promote something, or have other malicious intent.
 
-  * Run `mix setup` to install and setup dependencies
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+My goal is to watch the create a bot that observs the Bluesky stream (ie firehose/jetstream) to see who is following people in mass such as these bots.
+Then I will add these users to a list to make it easy to block them all.
