@@ -24,6 +24,22 @@ defmodule BsShitbot.BlueskyClient.Lists do
     |> handle_response()
   end
 
+  # Function to fetch detailed information about a specific list
+  def get_list(token, list_uri) do
+    url = "#{@base_url}/app.bsky.graph.getList"
+
+    params = %{
+      "list" => list_uri
+    }
+
+    headers = [
+      {"Authorization", "Bearer #{token}"}
+    ]
+
+    Req.get!(url, headers: headers, params: params)
+    |> handle_response()
+  end
+
   # Function to create a new list
   def create_list(token, repo, name, description, purpose \\ "app.bsky.graph.defs#modlist") do
     url = "#{@base_url}/com.atproto.repo.createRecord"

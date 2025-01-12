@@ -73,15 +73,9 @@ defmodule BsShitbot.DidBroadway do
         profile["followersCount"] < 10
     end)
     |> Flow.partition()
-    |> Flow.map(fn %{
-                     "did" => did,
-                     "followsCount" => followsCount,
-                     "postsCount" => postsCount,
-                     "followersCount" => followersCount
-                   } ->
-      did
-    end)
+    |> Flow.map(fn %{"did" => did} -> did end)
     |> Enum.to_list()
+    |> IO.inspect()
     |> BsShitbot.BlueskyClient.Lists.mass_assign_users_to_list(
       access_jwt,
       did,
