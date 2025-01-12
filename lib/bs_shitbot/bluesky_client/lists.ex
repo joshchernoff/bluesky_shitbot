@@ -1,0 +1,116 @@
+defmodule BsShitbot.BlueskyClient.Lists do
+  @moduledoc """
+  Module to interact with Bluesky API for creating and managing user lists.
+  """
+
+  @base_url "https://bsky.social/xrpc"
+  @list_collection "app.bsky.graph.list"
+  @listitem_collection "app.bsky.graph.listitem"
+
+  # Function to fetch all lists of a given DID
+  def get_lists_by_did(token, did) do
+    url = "#{@base_url}/app.bsky.graph.getLists"
+
+    # Parameters to specify the DID
+    params = %{
+      "actor" => did
+    }
+
+    headers = [
+      {"Authorization", "Bearer #{token}"}
+    ]
+
+    Req.get!(url, headers: headers, params: params)
+    |> handle_response()
+  end
+
+  # Function to create a new list
+  def create_list(token, repo, name, description, purpose \\ "app.bsky.graph.defs#modlist") do
+    url = "#{@base_url}/com.atproto.repo.createRecord"
+
+    body = %{
+      "repo" => repo,
+      "collection" => @list_collection,
+      "record" => %{
+        "$type" => @list_collection,
+        "purpose" => purpose,
+        "name" => name,
+        "description" => description,
+        "createdAt" => DateTime.utc_now() |> DateTime.to_iso8601()
+      }
+    }
+
+    headers = [{"Authorization", "Bearer #{token}"}]
+
+    Req.post!(url, headers: headers, json: body)
+    |> handle_response()
+  end
+
+  def get_list_items(token, list_cid) do
+    url = "#{@base_url}/app.bsky.graph.getListItems"
+
+    # Parameters to specify the CID of the list
+    params = %{
+      "list" => list_cid
+    }
+
+    headers = [
+      {"Authorization", "Bearer #{token}"}
+    ]
+
+    Req.get!(url, headers: headers, params: params)
+    |> handle_response()
+  end
+
+  # Function to mass assign users to the list
+  def mass_assign_users_to_list(user_dids, token, repo, list_uri) do
+    user_dids
+    |> Enum.map(&create_listitem(token, repo, list_uri, &1))
+    |> handle_batch_response()
+  end
+
+  # Internal function to create a list item for each user
+  defp create_listitem(token, repo, list_uri, did) do
+    url = "#{@base_url}/com.atproto.repo.createRecord"
+
+    body =
+      %{
+        "repo" => repo,
+        "collection" => @listitem_collection,
+        "record" => %{
+          "$type" => @listitem_collection,
+          "subject" => did,
+          "list" => list_uri,
+          "createdAt" => DateTime.utc_now() |> DateTime.to_iso8601()
+        }
+      }
+
+    headers = [{"Authorization", "Bearer #{token}"}]
+
+    Task.async(fn ->
+      Req.post!(url, headers: headers, json: body)
+    end)
+  end
+
+  # Handle batch response
+  defp handle_batch_response(tasks) do
+    tasks
+    |> Enum.map(&Task.await/1)
+    |> Enum.map(fn
+      %Req.Response{status: status, body: body} when status in 200..299 ->
+        {:ok, body}
+
+      %Req.Response{status: status, body: body} ->
+        {:error, %{status: status, body: Jason.decode!(body)}}
+    end)
+  end
+
+  # General response handler
+  defp handle_response(%Req.Response{status: status, body: body}) when status in 200..299 do
+    {:ok, body}
+  end
+
+  defp handle_response(%Req.Response{status: status, body: body}) do
+    {:error, %{status: status, body: Jason.decode!(body)}}
+  end
+end

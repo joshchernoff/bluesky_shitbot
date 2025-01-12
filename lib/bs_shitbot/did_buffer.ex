@@ -45,6 +45,7 @@ defmodule BsShitbot.DidBuffer do
 
       if MapSet.size(set) > 10_000 do
         # SEND SET TO PRODUCER for broadway
+        BsShitbot.DidProducer.process_dids(Enum.chunk_every(set, 20))
         {:reply, :ok, MapSet.new()}
       else
         {:reply, :ok, set}

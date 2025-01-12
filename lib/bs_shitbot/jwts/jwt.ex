@@ -5,6 +5,7 @@ defmodule BsShitbot.JWTS.JWT do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "jwts" do
+    field :did, :string
     field :handle, :string
     field :email, :string
     field :access_jwt, :string
@@ -16,7 +17,7 @@ defmodule BsShitbot.JWTS.JWT do
   @doc false
   def changeset(jwt, attrs) do
     jwt
-    |> cast(attrs, [:handle, :email, :access_jwt, :refresh_jwt])
-    |> validate_required([:handle, :email, :access_jwt, :refresh_jwt])
+    |> cast(attrs, [:did, :handle, :email, :access_jwt, :refresh_jwt])
+    |> validate_required([:did, :handle, :email, :access_jwt, :refresh_jwt])
   end
 end

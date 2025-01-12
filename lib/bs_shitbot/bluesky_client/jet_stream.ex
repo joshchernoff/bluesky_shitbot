@@ -8,9 +8,10 @@ defmodule BsShitbot.BlueskyClient.JetStream do
     url = "wss://jetstream1.us-west.bsky.network/subscribe?wantedCollections[]=app.bsky.feed.post"
     email = BsShitbot.config([:blue_sky, :email])
     pass = BsShitbot.config([:blue_sky, :pass])
+    %{access_jwt: access_jwt} = JWTS.authenticate_with_email(email, pass)
 
     WebSockex.start_link(url, __MODULE__, %{
-      access_token: JWTS.authenticate_with_email(email, pass)
+      access_token: access_jwt
     })
   end
 

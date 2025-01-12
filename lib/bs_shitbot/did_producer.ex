@@ -15,8 +15,8 @@ defmodule BsShitbot.DidProducer do
     |> GenStage.cast({:dids, dids})
   end
 
-  def handle_demand(demand, state) do
-    Logger.info("DidBroadway received demand for #{demand} dids")
+  def handle_demand(_demand, state) do
+    # Logger.info("DidBroadway received demand for #{demand} dids")
     events = []
     {:noreply, events, state}
   end

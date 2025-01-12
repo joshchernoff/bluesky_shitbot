@@ -47,7 +47,7 @@ defmodule BsShitbot.DidBroadway do
     # did = message.data
     case IdentResolver.get_profiles(dids) do
       {:ok, profiles} ->
-        Logger.info("Successfully queried profiles for dids #{dids}")
+        # Logger.info("Successfully queried profiles for dids #{dids}")
         Message.update_data(message, fn _ -> profiles end)
 
       {:error, reason} ->
@@ -58,33 +58,35 @@ defmodule BsShitbot.DidBroadway do
 
   @impl true
   def handle_batch(:default, messages, _batch_info, _context) do
-    batch_data =
-      messages
-      |> Enum.map(fn m -> m.data end)
-      |> List.flatten()
-      |> Flow.from_enumerable()
-      |> Flow.flat_map(fn %{"profiles" => profiles} -> profiles end)
-      |> Flow.filter(fn profile ->
-        profile["followsCount"] > 1000 and
-          profile["postsCount"] < 10 and
-          profile["followersCount"] < 10
-      end)
-      |> Flow.partition()
-      |> Flow.map(fn %{
-                       "did" => did,
-                       "followsCount" => followsCount,
-                       "postsCount" => postsCount,
-                       "followersCount" => followersCount
-                     } ->
-        %{
-          "did" => did,
-          followsCount: followsCount,
-          postsCount: postsCount,
-          followersCount: followersCount
-        }
-      end)
-      |> Enum.chunk_every(200)
-      |> IO.inspect()
+    email = BsShitbot.config([:blue_sky, :email])
+    pass = BsShitbot.config([:blue_sky, :pass])
+    %{access_jwt: access_jwt, did: did} = BsShitbot.JWTS.authenticate_with_email(email, pass)
+
+    messages
+    |> Enum.map(fn m -> m.data end)
+    |> List.flatten()
+    |> Flow.from_enumerable()
+    |> Flow.flat_map(fn %{"profiles" => profiles} -> profiles end)
+    |> Flow.filter(fn profile ->
+      profile["followsCount"] > 1000 and
+        profile["postsCount"] < 10 and
+        profile["followersCount"] < 10
+    end)
+    |> Flow.partition()
+    |> Flow.map(fn %{
+                     "did" => did,
+                     "followsCount" => followsCount,
+                     "postsCount" => postsCount,
+                     "followersCount" => followersCount
+                   } ->
+      did
+    end)
+    |> Enum.to_list()
+    |> BsShitbot.BlueskyClient.Lists.mass_assign_users_to_list(
+      access_jwt,
+      did,
+      "at://did:plc:4nd2nxnptle7cdq3thxtsqe6/app.bsky.graph.list/3lfikbvo2n52b"
+    )
 
     # .Repo.insert_all(SOMETHING, batch_data)
     messages
