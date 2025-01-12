@@ -6,8 +6,8 @@ defmodule BsShitbot.Repo.Migrations.CreateJwts do
       add :id, :binary_id, primary_key: true
       add :handle, :string
       add :email, :string
-      add :access_jwt, :string
-      add :refresh_jwt, :string
+      add :access_jwt, :text
+      add :refresh_jwt, :text
 
       timestamps(type: :utc_datetime)
     end

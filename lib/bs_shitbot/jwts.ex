@@ -4,7 +4,7 @@ defmodule BsShitbot.JWTS do
   """
 
   import Ecto.Query, warn: false
-  alias BsShitbot.Client.Bluesky
+  alias BsShitbot.BlueskyClient.Auth
   alias BsShitbot.Repo
   alias BsShitbot.JWTS.JWT
 
@@ -22,7 +22,7 @@ defmodule BsShitbot.JWTS do
   end
 
   def authenticate_with_email(email, password) do
-    Bluesky.authenticate(&get_jwt_by_email!/1, &upsirt_jwt_by_email/2, email, password)
+    Auth.authenticate(&get_jwt_by_email!/1, &upsirt_jwt_by_email/1, email, password)
   end
 
   @doc """
@@ -42,7 +42,7 @@ defmodule BsShitbot.JWTS do
   def get_jwt!(id), do: Repo.get!(JWT, id)
 
   def get_jwt_by_email!(email) do
-    Repo.get_by!(JWT, %{email: email})
+    from(jwt in JWT, where: jwt.email == ^email) |> Repo.all()
   end
 
   @doc """
@@ -63,12 +63,12 @@ defmodule BsShitbot.JWTS do
     |> Repo.insert()
   end
 
-  def upsirt_jwt_by_email(email, attrs) do
-    case from(jwt in JWT, where: jwt.email == ^email) |> Repo.one() do
-      {:ok, jwt} ->
+  def upsirt_jwt_by_email(%{email: email} = attrs) do
+    case from(jwt in JWT, where: jwt.email == ^email) |> Repo.all() do
+      [jwt] ->
         update_jwt(jwt, attrs)
 
-      _ ->
+      [] ->
         create_jwt(attrs)
     end
   end
