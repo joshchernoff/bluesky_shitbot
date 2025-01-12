@@ -20,6 +20,22 @@ if System.get_env("PHX_SERVER") do
   config :bs_shitbot, BsShitbotWeb.Endpoint, server: true
 end
 
+blue_sky_user =
+  System.get_env("BLUE_SKY_EMAIL") ||
+    raise """
+    environment variable BLUE_SKY_USER is missing.
+    """
+
+blue_sky_pass =
+  System.get_env("BLUE_SKY_PASS") ||
+    raise """
+    environment variable BLUE_SKY_PASS is missing.
+    """
+
+config :bs_shitbot, :blue_sky,
+  email: blue_sky_user,
+  pass: blue_sky_pass
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
