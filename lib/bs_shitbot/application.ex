@@ -16,6 +16,7 @@ defmodule BsShitbot.Application do
       {Finch, name: BsShitbot.Finch},
       BsShitbot.BlueskyClient.JetStream,
       BsShitbot.DidBuffer,
+      BsShitbot.DidBroadway,
       # Start a worker by calling: BsShitbot.Worker.start_link(arg)
       # {BsShitbot.Worker, arg},
       # Start to serve requests, typically the last entry

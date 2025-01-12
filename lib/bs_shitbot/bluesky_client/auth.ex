@@ -41,8 +41,7 @@ defmodule BsShitbot.BlueskyClient.Auth do
              "identifier" => email,
              "password" => password
            }
-         )
-         |> dbg() do
+         ) do
       {:ok, %{status: 200, body: response}} ->
         {:ok, response}
 

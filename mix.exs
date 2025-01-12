@@ -59,7 +59,9 @@ defmodule BsShitbot.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:req, "~> 0.5.7"},
-      {:websockex, "~> 0.4.3"}
+      {:websockex, "~> 0.4.3"},
+      {:broadway, "~> 1.1"},
+      {:flow, "~> 1.2"}
     ]
   end
 

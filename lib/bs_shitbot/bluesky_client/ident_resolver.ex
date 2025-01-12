@@ -19,7 +19,7 @@ defmodule BsShitbot.BlueskyClient.IdentResolver do
     url = "#{@api_base}/app.bsky.actor.getProfiles"
     query = build_query(dids)
 
-    case Req.get(url <> query) |> dbg() do
+    case Req.get(url <> query) do
       {:ok, %{status: 200, body: body}} ->
         {:ok, body}
 
