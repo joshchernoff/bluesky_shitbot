@@ -15,6 +15,7 @@ defmodule BsShitbot.Application do
       # Start the Finch HTTP client for sending emails
       {Finch, name: BsShitbot.Finch},
       BsShitbot.BlueskyClient.JetStream,
+      BsShitbot.DidBuffer,
       # Start a worker by calling: BsShitbot.Worker.start_link(arg)
       # {BsShitbot.Worker, arg},
       # Start to serve requests, typically the last entry

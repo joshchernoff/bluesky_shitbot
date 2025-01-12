@@ -58,12 +58,12 @@ defmodule BsShitbot.BlueskyClient.Auth do
   Create a new jws from a refreshing jwt
   """
   def refresh_auth_token(refresh_token) do
-    case Req.post(
-           @url <> ".refreshSession",
-           json: %{
-             "refresh_token" => refresh_token
-           }
-         ) do
+    headers = [
+      {"Authorization", "Bearer #{refresh_token}"}
+    ]
+
+    case Req.post(@url <> ".refreshSession", headers: headers)
+         |> dbg() do
       {:ok, %{status: 200, body: response}} ->
         {:ok, response}
 
@@ -90,7 +90,7 @@ defmodule BsShitbot.BlueskyClient.Auth do
   end
 
   # Return refresh jwt
-  defp maybe_refresh_jwt({:refesh_jwt, refesh_jwt}, refresh_auth_token_fn) do
+  defp maybe_refresh_jwt({:refresh_jwt, refesh_jwt}, refresh_auth_token_fn) do
     refresh_auth_token_fn.(refesh_jwt)
   end
 
@@ -106,11 +106,10 @@ defmodule BsShitbot.BlueskyClient.Auth do
           %{
             "accessJwt" => access_jwt,
             "refreshJwt" => refresh_jwt,
-            "email" => email,
             "handle" => handle
           }},
          upsirt_fn,
-         _,
+         email,
          _,
          _
        ) do

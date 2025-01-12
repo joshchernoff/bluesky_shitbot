@@ -1,9 +1,8 @@
 defmodule BsShitbot.BlueskyClient.JetStream do
   use WebSockex
   require Logger
-
+  alias BsShitbot.DidBuffer
   alias BsShitbot.JWTS
-  # alias Paraia.DidStorage
 
   def start_link(_) do
     url = "wss://jetstream1.us-west.bsky.network/subscribe?wantedCollections[]=app.bsky.feed.post"
@@ -44,16 +43,14 @@ defmodule BsShitbot.BlueskyClient.JetStream do
     {:ok, state}
   end
 
-  def is_follow?(
-        %{
-          "commit" => %{
-            "collection" => "app.bsky.graph.follow",
-            "operation" => "create"
-          }
-        } = msg
-      ) do
-    msg
-    |> dbg()
+  def is_follow?(%{
+        "commit" => %{
+          "collection" => "app.bsky.graph.follow",
+          "operation" => "create"
+        },
+        "did" => did
+      }) do
+    DidBuffer.add_did(did)
   end
 
   def is_follow?(_), do: nil
