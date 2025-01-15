@@ -24,13 +24,16 @@ defmodule BsShitbot.BlueskyClient.Lists do
     |> handle_response()
   end
 
-  # Function to fetch detailed information about a specific list
-  def get_list(token, list_uri) do
+  # Function to fetch detailed information about a specific list with optional cursor support
+  def get_list(token, list_uri, cursor \\ nil) do
     url = "#{@base_url}/app.bsky.graph.getList"
 
-    params = %{
-      "list" => list_uri
-    }
+    # Include the cursor in params only if it's provided
+    params =
+      %{
+        "list" => list_uri
+      }
+      |> Map.merge(if cursor, do: %{"cursor" => cursor}, else: %{})
 
     headers = [
       {"Authorization", "Bearer #{token}"}
@@ -81,7 +84,14 @@ defmodule BsShitbot.BlueskyClient.Lists do
   # Function to mass assign users to the list
   def mass_assign_users_to_list(user_dids, token, repo, list_uri) do
     user_dids
+    # |> Enum.chunk_every(20)
     |> Enum.map(&create_listitem(token, repo, list_uri, &1))
+    |> handle_batch_response()
+  end
+
+  def mass_remove_users_from_list(rkeys, token, repo) do
+    rkeys
+    |> Enum.map(&delete_listitem(token, repo, &1))
     |> handle_batch_response()
   end
 
@@ -99,6 +109,23 @@ defmodule BsShitbot.BlueskyClient.Lists do
           "list" => list_uri,
           "createdAt" => DateTime.utc_now() |> DateTime.to_iso8601()
         }
+      }
+
+    headers = [{"Authorization", "Bearer #{token}"}]
+
+    Task.async(fn ->
+      Req.post!(url, headers: headers, json: body)
+    end)
+  end
+
+  def delete_listitem(token, repo, rkey) do
+    url = "#{@base_url}/com.atproto.repo.deleteRecord"
+
+    body =
+      %{
+        "repo" => repo,
+        "collection" => @listitem_collection,
+        "rkey" => rkey
       }
 
     headers = [{"Authorization", "Bearer #{token}"}]

@@ -38,6 +38,28 @@ defmodule BsShitbot.BlueskyClient.IdentResolver do
     end
   end
 
+  @doc """
+  Resolves the DID for a given handle.
+
+  ## Example
+      iex> resolve_did("example.bsky.social")
+      {:ok, "did:plc:example123"}
+  """
+  def resolve_did(handle) when is_binary(handle) do
+    url = "#{@api_base}/com.atproto.identity.resolveHandle?handle=#{URI.encode(handle)}"
+
+    case Req.get(url) do
+      {:ok, %{status: 200, body: %{"did" => did}}} ->
+        {:ok, did}
+
+      {:ok, %{status: status, body: body}} ->
+        {:error, {:http_error, status, body}}
+
+      {:error, reason} ->
+        {:error, {:request_failed, reason}}
+    end
+  end
+
   defp build_query(dids) do
     # Construct the query string by encoding each DID as `actors[]`
     query_string =
