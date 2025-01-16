@@ -135,6 +135,24 @@ defmodule BsShitbot.BlueskyClient.Lists do
     end)
   end
 
+  def find_rkey_for_did(token, did, list, cursor \\ nil, count \\ 0) do
+    case BsShitbot.BlueskyClient.Lists.get_list(token, list, cursor) do
+      {:ok, %{"items" => []}} ->
+        "not found #{count}"
+
+      {:ok, %{"cursor" => cursor, "items" => items}} ->
+        case Enum.find(items, fn %{"subject" => %{"did" => i_did}} ->
+               did == i_did
+             end) do
+          nil ->
+            find_rkey_for_did(token, did, list, cursor, count + Enum.count(items))
+
+          item ->
+            item
+        end
+    end
+  end
+
   # Handle batch response
   defp handle_batch_response(tasks) do
     tasks
