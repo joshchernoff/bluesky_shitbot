@@ -1,5 +1,6 @@
 email = BsShitbot.config([:blue_sky, :email])
 pass = BsShitbot.config([:blue_sky, :pass])
+shitlist_uri = "at://did:plc:4nd2nxnptle7cdq3thxtsqe6/app.bsky.graph.list/3lfikbvo2n52b"
 
 jwt_fn = fn creds ->
   BsShitbot.JWTS.authenticate_with_email(
