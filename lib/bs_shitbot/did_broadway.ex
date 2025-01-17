@@ -166,7 +166,7 @@ defmodule BsShitbot.DidBroadway do
        when following < following_threshold,
        do: false
 
-  defp below_ratio?(target, following, _following_threshold, ratio, did) do
+  defp below_ratio?(target, following, _following_threshold, ratio, _did) do
     target / following <= ratio
   end
 

@@ -115,7 +115,6 @@ defmodule BsShitbot.BlueskyClient.Lists do
 
     Task.async(fn ->
       Req.post!(url, headers: headers, json: body)
-      |> dbg()
     end)
   end
 
