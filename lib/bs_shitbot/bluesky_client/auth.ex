@@ -112,7 +112,7 @@ defmodule BsShitbot.BlueskyClient.Auth do
   defp maybe_refresh_jwt(nil, _), do: nil
 
   # given we already have current jwt
-  defp maybe_upsirt_jwt({:ok, %{access_jwt: access_jwt} = jwt}, _, _, _, _), do: jwt
+  defp maybe_upsirt_jwt({:ok, %{access_jwt: _access_jwt} = jwt}, _, _, _, _), do: jwt
 
   # given we had to refresh auth
   defp maybe_upsirt_jwt(

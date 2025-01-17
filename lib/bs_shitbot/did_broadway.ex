@@ -79,35 +79,30 @@ defmodule BsShitbot.DidBroadway do
   def handle_batch(:default, messages, _batch_info, _context) do
     email = BsShitbot.config([:blue_sky, :email])
     pass = BsShitbot.config([:blue_sky, :pass])
-    %{access_jwt: access_jwt, did: my_did} = BsShitbot.JWTS.authenticate_with_email(email, pass)
+    %{did: my_did, access_jwt: access_jwt} = BsShitbot.JWTS.authenticate_with_email(email, pass)
 
     messages
-    |> Enum.map(fn m -> m.data end)
+    |> Enum.map(fn %{data: data} -> data end)
+    |> List.flatten()
+    |> Enum.map(fn %{"profiles" => profiles} -> profiles end)
     |> List.flatten()
     |> Flow.from_enumerable()
-    |> Flow.flat_map(fn %{"profiles" => profiles} -> profiles end)
     |> Flow.filter(fn profile ->
-      !above_ratio?(profile["followersCount"], profile["followsCount"])
+      below_threshold?(profile)
     end)
-    |> Flow.filter(fn profile ->
-      !match_any?(
-        [
-          "uwu.ai",
-          "tinyurl.com",
-          "getallmylinks.com",
-          "https://gE\u200BtA\u200BlL\u200BmY\u200BlI\u200BnK\u200Bs.com/",
-          "the bio",
-          ".carrd.co",
-          ".crd.c",
-          ".ju.mp",
-          "gofundme.com"
-        ],
-        profile["description"]
-      )
+    |> Enum.map(fn profile ->
+      # IO.inspect(%{
+      #   followers: profile["followersCount"],
+      #   posts: profile["postsCount"],
+      #   following: profile["followsCount"],
+      #   follower_calc: profile["followersCount"] / profile["followsCount"],
+      #   posts_calc: profile["postsCount"] / profile["followsCount"],
+      #   follower_2_following: profile["followersCount"] / profile["followsCount"] >= 0.01,
+      #   posts_2_following: profile["postsCount"] / profile["followsCount"] >= 0.001,
+      #   url: "https://bsky.app/profile/#{profile["did"]}"
+      # })
+      profile["did"]
     end)
-    |> Flow.partition()
-    |> Flow.map(fn %{"did" => did} -> did end)
-    |> Enum.to_list()
     |> BsShitbot.BlueskyClient.Lists.mass_assign_users_to_list(
       access_jwt,
       my_did,
@@ -150,10 +145,29 @@ defmodule BsShitbot.DidBroadway do
     messages
   end
 
-  defp above_ratio?(_followers, following) when following < 99, do: true
+  defp below_threshold?(profile) do
+    below_ratio?(
+      profile["followersCount"],
+      profile["followsCount"],
+      200,
+      0.01,
+      profile["did"]
+    ) ||
+      below_ratio?(
+        profile["followersCount"],
+        profile["postsCount"],
+        1000,
+        0.001,
+        profile["did"]
+      )
+  end
 
-  defp above_ratio?(followers, following) do
-    followers / following >= 0.01
+  defp below_ratio?(_target, following, following_threshold, _, _did)
+       when following < following_threshold,
+       do: false
+
+  defp below_ratio?(target, following, _following_threshold, ratio, did) do
+    target / following <= ratio
   end
 
   def match_any?(_substrings, nil), do: false
