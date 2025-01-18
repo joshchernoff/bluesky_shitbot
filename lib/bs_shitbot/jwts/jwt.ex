@@ -10,14 +10,14 @@ defmodule BsShitbot.JWTS.JWT do
     field :email, :string
     field :access_jwt, :string
     field :refresh_jwt, :string
-
+    field :service_endpoint, :string
     timestamps(type: :utc_datetime)
   end
 
   @doc false
   def changeset(jwt, attrs) do
     jwt
-    |> cast(attrs, [:did, :handle, :email, :access_jwt, :refresh_jwt])
-    |> validate_required([:did, :handle, :email, :access_jwt, :refresh_jwt])
+    |> cast(attrs, [:did, :handle, :email, :access_jwt, :refresh_jwt, :service_endpoint])
+    |> validate_required([:did, :handle, :email, :access_jwt, :refresh_jwt, :service_endpoint])
   end
 end

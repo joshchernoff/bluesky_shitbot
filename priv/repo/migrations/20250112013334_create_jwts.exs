@@ -9,7 +9,7 @@ defmodule BsShitbot.Repo.Migrations.CreateJwts do
       add :email, :string
       add :access_jwt, :text
       add :refresh_jwt, :text
-
+      add :service_endpoint, :text
       timestamps(type: :utc_datetime)
     end
   end

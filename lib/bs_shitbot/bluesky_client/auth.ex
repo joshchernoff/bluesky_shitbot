@@ -121,7 +121,15 @@ defmodule BsShitbot.BlueskyClient.Auth do
             "accessJwt" => access_jwt,
             "refreshJwt" => refresh_jwt,
             "handle" => handle,
-            "did" => did
+            "did" => did,
+            "didDoc" => %{
+              "service" => [
+                %{
+                  "id" => "#atproto_pds",
+                  "serviceEndpoint" => service_endpoint
+                }
+              ]
+            }
           }},
          upsirt_fn,
          email,
@@ -133,7 +141,8 @@ defmodule BsShitbot.BlueskyClient.Auth do
            refresh_jwt: refresh_jwt,
            email: email,
            handle: handle,
-           did: did
+           did: did,
+           service_endpoint: service_endpoint
          }) do
       {:ok, jwt} -> jwt
     end
@@ -148,14 +157,23 @@ defmodule BsShitbot.BlueskyClient.Auth do
          "refreshJwt" => refresh_jwt,
          "email" => email,
          "handle" => handle,
-         "did" => did
+         "did" => did,
+         "didDoc" => %{
+           "service" => [
+             %{
+               "id" => "#atproto_pds",
+               "serviceEndpoint" => service_endpoint
+             }
+           ]
+         }
        }} ->
         case upsirt_fn.(%{
                access_jwt: access_jwt,
                refresh_jwt: refresh_jwt,
                email: email,
                handle: handle,
-               did: did
+               did: did,
+               service_endpoint: service_endpoint
              }) do
           {:ok, jwt} -> jwt
         end

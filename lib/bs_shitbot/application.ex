@@ -14,6 +14,7 @@ defmodule BsShitbot.Application do
       {Phoenix.PubSub, name: BsShitbot.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: BsShitbot.Finch},
+      BsShitbot.BlueskyClient.ChatPoller,
       BsShitbot.BlueskyClient.JetStream,
       BsShitbot.DidBuffer,
       BsShitbot.DidBroadway,

@@ -95,8 +95,7 @@ defmodule BsShitbot.BlueskyClient.Lists do
     |> handle_batch_response()
   end
 
-  # Internal function to create a list item for each user
-  defp create_listitem(token, repo, list_uri, did) do
+  def create_listitem(token, repo, list_uri, did) do
     url = "#{@base_url}/com.atproto.repo.createRecord"
 
     body =
@@ -138,7 +137,7 @@ defmodule BsShitbot.BlueskyClient.Lists do
   def find_rkey_for_did(token, did, list, cursor \\ nil, count \\ 0) do
     case BsShitbot.BlueskyClient.Lists.get_list(token, list, cursor) do
       {:ok, %{"items" => []}} ->
-        "not found #{count}"
+        "DID not found out of #{count} active accounts"
 
       {:ok, %{"cursor" => cursor, "items" => items}} ->
         case Enum.find(items, fn %{"subject" => %{"did" => i_did}} ->
