@@ -123,6 +123,37 @@ defmodule BsShitbot.BlueskyClient.ChatPoller do
     end
   end
 
+  def parse_message(%{"convoId" => convo_id, "message" => %{"text" => "/remove @" <> username}}) do
+    case BsShitbot.BlockedAccounts.get_blocked_account_by_handle(username) do
+      {:ok, %{uri: uri}} ->
+        email = BsShitbot.config([:blue_sky, :email])
+        pass = BsShitbot.config([:blue_sky, :pass])
+
+        %{access_jwt: access_jwt, did: repo, service_endpoint: service_endpoint} =
+          JWTS.authenticate_with_email(email, pass)
+
+        rkey = String.split(uri, "/") |> List.last()
+
+        BsShitbot.BlueskyClient.Lists.mass_remove_users_from_list(
+          [rkey],
+          access_jwt,
+          repo
+        )
+
+        BsShitbot.BlueskyClient.Chat.send_message(
+          access_jwt,
+          service_endpoint,
+          convo_id,
+          "Removing #{username} from the list!"
+        )
+
+        IO.inspect("sending to shitlist #{username}")
+
+      {:error, reason} ->
+        IO.inspect("Failed #{reason}")
+    end
+  end
+
   def parse_message(%{"convoId" => convo_id, "message" => %{"text" => "/find @" <> username}}) do
     email = BsShitbot.config([:blue_sky, :email])
     pass = BsShitbot.config([:blue_sky, :pass])

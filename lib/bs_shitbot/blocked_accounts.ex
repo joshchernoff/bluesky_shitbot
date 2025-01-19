@@ -37,6 +37,8 @@ defmodule BsShitbot.BlockedAccounts do
   """
   def get_blocked_account!(id), do: Repo.get!(BlockedAccount, id)
 
+  def get_blocked_account_by_handle(handle), do: Repo.get_by!(BlockedAccount, %{handle: handle})
+
   def upsert!(%{did: did, uri: uri} = blocked_record) do
     handle = Map.get(blocked_record, :handle, nil)
     display_name = Map.get(blocked_record, :display_name, nil)
