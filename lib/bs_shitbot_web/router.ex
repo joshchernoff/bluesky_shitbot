@@ -17,7 +17,7 @@ defmodule BsShitbotWeb.Router do
   scope "/", BsShitbotWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", Dash, :index
   end
 
   # Other scopes may use custom stacks.

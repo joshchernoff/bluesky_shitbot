@@ -17,7 +17,9 @@ defmodule BsShitbot.Application do
       BsShitbot.BlueskyClient.ChatPoller,
       BsShitbot.BlueskyClient.JetStream,
       BsShitbot.DidBuffer,
-      BsShitbot.DidBroadway,
+      BsShitbot.IdendInsertPipeline,
+      # BsShitbot.IdentUpdatePipeline,
+
       # Start a worker by calling: BsShitbot.Worker.start_link(arg)
       # {BsShitbot.Worker, arg},
       # Start to serve requests, typically the last entry

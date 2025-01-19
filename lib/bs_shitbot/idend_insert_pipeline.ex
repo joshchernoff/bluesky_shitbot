@@ -1,4 +1,4 @@
-defmodule BsShitbot.DidBroadway do
+defmodule BsShitbot.IdendInsertPipeline do
   use Broadway
   require Logger
 
@@ -46,34 +46,32 @@ defmodule BsShitbot.DidBroadway do
   def handle_message(:default, message, _) do
     case IdentResolver.get_profiles(message.data) do
       {:ok, profiles} ->
-        # Logger.info("Successfully queried profiles for dids #{dids}")
         Message.update_data(message, fn _ -> profiles end)
 
       {:error, reason} ->
-        # Logger.error("Failed to query dids for #{dids}: #{inspect(reason)}")
         Message.failed(message, reason)
     end
-
-    ########### REMOVE FROM LIST LOGIC
-    # dids = Enum.map(list_items, fn {did, _} -> did end)
-    # case IdentResolver.get_profiles(dids) do
-    #   {:ok, %{"profiles" => profiles}} ->
-    #     profiles =
-    #       profiles
-    #       |> Enum.map(fn %{"did" => did} = profile ->
-    #         {_, rkey} = Enum.find(list_items, fn {l_did, _rkey} -> did == l_did end)
-    #         rkey = List.last(String.split(rkey, "/"))
-    #         {profile, rkey}
-    #       end)
-
-    #     # Logger.info("Successfully queried profiles for dids #{dids}")
-    #     Message.update_data(message, fn _ -> profiles end)
-
-    #   {:error, reason} ->
-    #     Logger.error("Failed to query dids for #{dids}: #{inspect(reason)}")
-    #     Message.failed(message, reason)
-    # end
   end
+
+  # def handle_message(:default, %{data: data} = message, _) do
+  #   email = BsShitbot.config([:blue_sky, :email])
+  #   pass = BsShitbot.config([:blue_sky, :pass])
+  #   %{did: my_did, access_jwt: access_jwt} = BsShitbot.JWTS.authenticate_with_email(email, pass)
+
+  #   data
+  #   |> Enum.filter(fn profile ->
+  #     # IO.inspect([profile, above_threshold?(profile)])
+  #     !above_threshold?(profile)
+  #   end)
+  #   |> Enum.map(fn %{uri: uri} -> String.split(uri, "/") |> List.last() end)
+  #   |> IO.inspect()
+  #   |> BsShitbot.BlueskyClient.Lists.mass_remove_users_from_list(
+  #     access_jwt,
+  #     my_did
+  #   )
+
+  #   Message.ack_immediately(message)
+  # end
 
   @impl true
   def handle_batch(:default, messages, _batch_info, _context) do
@@ -90,60 +88,32 @@ defmodule BsShitbot.DidBroadway do
     |> Flow.filter(fn profile ->
       below_threshold?(profile)
     end)
-    |> Enum.map(fn profile ->
-      # IO.inspect(%{
-      #   followers: profile["followersCount"],
-      #   posts: profile["postsCount"],
-      #   following: profile["followsCount"],
-      #   follower_calc: profile["followersCount"] / profile["followsCount"],
-      #   posts_calc: profile["postsCount"] / profile["followsCount"],
-      #   follower_2_following: profile["followersCount"] / profile["followsCount"] >= 0.01,
-      #   posts_2_following: profile["postsCount"] / profile["followsCount"] >= 0.001,
-      #   url: "https://bsky.app/profile/#{profile["did"]}"
-      # })
-      profile["did"]
-    end)
+    |> Enum.to_list()
     |> BsShitbot.BlueskyClient.Lists.mass_assign_users_to_list(
       access_jwt,
       my_did,
       "at://did:plc:4nd2nxnptle7cdq3thxtsqe6/app.bsky.graph.list/3lfikbvo2n52b"
     )
 
-    ############### REMOVE FROM LIST
-    # messages
-    # |> Enum.map(fn m -> m.data end)
-    # |> List.flatten()
-    # |> Flow.from_enumerable()
-    # |> Flow.filter(fn {profile, _rkey} ->
-    #   above_ratio?(profile["followersCount"], profile["followsCount"])
-    # end)
-    # |> Flow.filter(fn {profile, _rkey} ->
-    #   !match_any?(
-    #     [
-    #       "uwu.ai",
-    #       "tinyurl.com",
-    #       "getallmylinks.com",
-    #       "https://gE\u200BtA\u200BlL\u200BmY\u200BlI\u200BnK\u200Bs.com/",
-    #       "the bio",
-    #       ".carrd.co",
-    #       ".crd.c",
-    #       ".ju.mp",
-    #       # "linktr.ee",
-    #       "gofundme.com"
-    #     ],
-    #     profile["description"]
-    #   )
-    # end)
-    # |> Flow.partition()
-    # |> Flow.map(fn {%{"did" => _did}, rkey} -> rkey end)
-    # |> Enum.to_list()
-    # |> BsShitbot.BlueskyClient.Lists.mass_remove_users_from_list(
-    #   access_jwt,
-    #   my_did
-    # )
-    # ####################
     messages
   end
+
+  # defp above_threshold?(profile) do
+  #   below_ratio?(
+  #     profile.followers_count || 0,
+  #     profile.following_count || 0,
+  #     200,
+  #     0.01,
+  #     profile.did
+  #   ) ||
+  #     below_ratio?(
+  #       profile.followers_count || 0,
+  #       profile.posts_count || 0,
+  #       1000,
+  #       0.001,
+  #       profile.did
+  #     )
+  # end
 
   defp below_threshold?(profile) do
     below_ratio?(

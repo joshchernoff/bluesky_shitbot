@@ -65,26 +65,9 @@ defmodule BsShitbot.BlueskyClient.Lists do
     |> handle_response()
   end
 
-  def get_list_items(token, list_cid) do
-    url = "#{@base_url}/app.bsky.graph.getListItems"
-
-    # Parameters to specify the CID of the list
-    params = %{
-      "list" => list_cid
-    }
-
-    headers = [
-      {"Authorization", "Bearer #{token}"}
-    ]
-
-    Req.get!(url, headers: headers, params: params)
-    |> handle_response()
-  end
-
   # Function to mass assign users to the list
-  def mass_assign_users_to_list(user_dids, token, repo, list_uri) do
-    user_dids
-    # |> Enum.chunk_every(20)
+  def mass_assign_users_to_list(profiles, token, repo, list_uri) do
+    profiles
     |> Enum.map(&create_listitem(token, repo, list_uri, &1))
     |> handle_batch_response()
   end
@@ -95,26 +78,47 @@ defmodule BsShitbot.BlueskyClient.Lists do
     |> handle_batch_response()
   end
 
-  def create_listitem(token, repo, list_uri, did) do
-    url = "#{@base_url}/com.atproto.repo.createRecord"
+  def create_listitem(token, repo, list_uri, %{"did" => did} = profile) do
+    case BsShitbot.Repo.get_by(BsShitbot.BlockedAccounts.BlockedAccount, %{did: did}) do
+      nil ->
+        url = "#{@base_url}/com.atproto.repo.createRecord"
 
-    body =
-      %{
-        "repo" => repo,
-        "collection" => @listitem_collection,
-        "record" => %{
-          "$type" => @listitem_collection,
-          "subject" => did,
-          "list" => list_uri,
-          "createdAt" => DateTime.utc_now() |> DateTime.to_iso8601()
-        }
-      }
+        body =
+          %{
+            "repo" => repo,
+            "collection" => @listitem_collection,
+            "record" => %{
+              "$type" => @listitem_collection,
+              "subject" => profile["did"],
+              "list" => list_uri,
+              "createdAt" => DateTime.utc_now() |> DateTime.to_iso8601()
+            }
+          }
 
-    headers = [{"Authorization", "Bearer #{token}"}]
+        headers = [{"Authorization", "Bearer #{token}"}]
 
-    Task.async(fn ->
-      Req.post!(url, headers: headers, json: body)
-    end)
+        Task.async(fn ->
+          case Req.post(url, headers: headers, json: body) do
+            {:ok, %{status: 200, body: body}} ->
+              {:ok, body, profile}
+
+            {:ok, %{status: status, body: body}} ->
+              {:error, {:http_error, status, body}}
+
+            {:error, reason} ->
+              # parse for bad actors and get the index from the error and return the did that failed.
+              {:error, {:request_failed, reason}}
+          end
+        end)
+
+      blocked_account ->
+        Task.async(fn ->
+          BsShitbot.BlockedAccounts.update_blocked_account(
+            blocked_account,
+            parse_profile(profile)
+          )
+        end)
+    end
   end
 
   def delete_listitem(token, repo, rkey) do
@@ -130,7 +134,7 @@ defmodule BsShitbot.BlueskyClient.Lists do
     headers = [{"Authorization", "Bearer #{token}"}]
 
     Task.async(fn ->
-      Req.post!(url, headers: headers, json: body)
+      Req.post(url, headers: headers, json: body)
     end)
   end
 
@@ -157,11 +161,18 @@ defmodule BsShitbot.BlueskyClient.Lists do
     tasks
     |> Enum.map(&Task.await/1)
     |> Enum.map(fn
-      %Req.Response{status: status, body: body} when status in 200..299 ->
-        {:ok, body}
+      {:ok, body, profile} ->
+        uri = Map.get(body, "uri", nil)
+        profile = parse_profile(profile, uri)
+        {:ok, block} = BsShitbot.BlockedAccounts.create_blocked_account(profile)
 
-      %Req.Response{status: status, body: body} ->
-        {:error, %{status: status, body: Jason.decode!(body)}}
+        Phoenix.PubSub.broadcast(BsShitbot.PubSub, "blocks", %{block | state: :new})
+
+      {:ok, profile} ->
+        Phoenix.PubSub.broadcast(BsShitbot.PubSub, "blocks", %{profile | state: :update})
+
+      %{status: status, body: body} ->
+        {:error, %{status: status, body: body}}
     end)
   end
 
@@ -172,5 +183,29 @@ defmodule BsShitbot.BlueskyClient.Lists do
 
   defp handle_response(%Req.Response{status: status, body: body}) do
     {:error, %{status: status, body: Jason.decode!(body)}}
+  end
+
+  defp parse_profile(profile, uri) do
+    %{
+      did: profile["did"],
+      uri: uri,
+      handle: Map.get(profile, "handle", nil),
+      display_name: Map.get(profile, "displayName", nil),
+      avatar_uri: Map.get(profile, "avatar", nil),
+      posts_count: Map.get(profile, "postsCount", nil),
+      following_count: Map.get(profile, "followsCount", nil),
+      followers_count: Map.get(profile, "followersCount", nil)
+    }
+  end
+
+  defp parse_profile(profile) do
+    %{
+      handle: Map.get(profile, "handle", nil),
+      display_name: Map.get(profile, "displayName", nil),
+      avatar_uri: Map.get(profile, "avatar", nil),
+      posts_count: Map.get(profile, "postsCount", nil),
+      following_count: Map.get(profile, "followsCount", nil),
+      followers_count: Map.get(profile, "followersCount", nil)
+    }
   end
 end

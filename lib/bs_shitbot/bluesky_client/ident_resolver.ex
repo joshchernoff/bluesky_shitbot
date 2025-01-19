@@ -23,17 +23,11 @@ defmodule BsShitbot.BlueskyClient.IdentResolver do
       {:ok, %{status: 200, body: body}} ->
         {:ok, body}
 
-      # parsed = IO.inspect(body)
-
-      # case parsed do
-      #   {:ok, %{"profiles" => profiles}} -> {:ok, profiles}
-      #   {:error, reason} -> {:error, {:json_decode_error, reason}}
-      # end
-
       {:ok, %{status: status, body: body}} ->
         {:error, {:http_error, status, body}}
 
       {:error, reason} ->
+        # parse for bad actors and get the index from the error and return the did that failed.
         {:error, {:request_failed, reason}}
     end
   end

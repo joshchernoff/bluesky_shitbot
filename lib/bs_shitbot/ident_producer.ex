@@ -1,15 +1,15 @@
-defmodule BsShitbot.DidProducer do
+defmodule BsShitbot.IdentProducer do
   use GenStage
   require Logger
 
-  alias BsShitbot.IdendInsertPipeline
+  alias BsShitbot.IdentUpdatePipeline
 
   def init(opts) do
     {:producer, opts}
   end
 
   def process_dids(dids) when is_list(dids) do
-    IdendInsertPipeline
+    IdentUpdatePipeline
     |> Broadway.producer_names()
     |> dbg()
     |> List.first()
