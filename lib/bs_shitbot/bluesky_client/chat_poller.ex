@@ -125,7 +125,7 @@ defmodule BsShitbot.BlueskyClient.ChatPoller do
 
   def parse_message(%{"convoId" => convo_id, "message" => %{"text" => "/remove @" <> username}}) do
     case BsShitbot.BlockedAccounts.get_blocked_account_by_handle(username) do
-      {:ok, %{uri: uri}} ->
+      %{uri: uri} ->
         email = BsShitbot.config([:blue_sky, :email])
         pass = BsShitbot.config([:blue_sky, :pass])
 
@@ -147,10 +147,7 @@ defmodule BsShitbot.BlueskyClient.ChatPoller do
           "Removing #{username} from the list!"
         )
 
-        IO.inspect("sending to shitlist #{username}")
-
-      {:error, reason} ->
-        IO.inspect("Failed #{reason}")
+        IO.inspect("removing from shitlist #{username}")
     end
   end
 
