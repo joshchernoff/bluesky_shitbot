@@ -100,21 +100,27 @@ defmodule BsShitbot.BlueskyClient.ChatPoller do
 
     {:ok, did} = BsShitbot.BlueskyClient.IdentResolver.resolve_did(username)
 
-    BsShitbot.BlueskyClient.Lists.mass_assign_users_to_list(
-      [did],
-      access_jwt,
-      repo,
-      "at://did:plc:4nd2nxnptle7cdq3thxtsqe6/app.bsky.graph.list/3lfikbvo2n52b"
-    )
+    case BsShitbot.BlueskyClient.IdentResolver.get_profiles([did]) do
+      {:ok, %{"profiles" => profiles}} ->
+        BsShitbot.BlueskyClient.Lists.mass_assign_users_to_list(
+          profiles,
+          access_jwt,
+          repo,
+          "at://did:plc:4nd2nxnptle7cdq3thxtsqe6/app.bsky.graph.list/3lfikbvo2n52b"
+        )
 
-    BsShitbot.BlueskyClient.Chat.send_message(
-      access_jwt,
-      service_endpoint,
-      convo_id,
-      "Adding 💩🤖 to the list!"
-    )
+        BsShitbot.BlueskyClient.Chat.send_message(
+          access_jwt,
+          service_endpoint,
+          convo_id,
+          "Adding 💩🤖 to the list!"
+        )
 
-    IO.inspect("sending to shitlist #{username}")
+        IO.inspect("sending to shitlist #{username}")
+
+      {:error, reason} ->
+        IO.inspect("Failed #{reason}")
+    end
   end
 
   def parse_message(%{"convoId" => convo_id, "message" => %{"text" => "/find @" <> username}}) do
