@@ -22,7 +22,7 @@ defmodule BsShitbotWeb.Dash do
 
           <li class="py-4">
             Accounts that follow more than 1000 other accounts,<br />
-            but also has less than 0.01% Posts. (IE 1000:1, 10_000:10)
+            but also has less than 0.1% Posts. (IE 1000:1, 10_000:10)
           </li>
 
           <li class="py-4">
