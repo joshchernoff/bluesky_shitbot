@@ -168,8 +168,8 @@ defmodule BsShitbot.BlueskyClient.Lists do
 
         Phoenix.PubSub.broadcast(BsShitbot.PubSub, "blocks", %{block | state: :new})
 
-      {:ok, profile} ->
-        Phoenix.PubSub.broadcast(BsShitbot.PubSub, "blocks", %{profile | state: :update})
+      {:ok, _profile} ->
+        :ok
 
       %{status: status, body: body} ->
         {:error, %{status: status, body: body}}
