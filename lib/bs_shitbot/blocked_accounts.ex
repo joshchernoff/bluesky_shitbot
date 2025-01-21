@@ -13,6 +13,10 @@ defmodule BsShitbot.BlockedAccounts do
     |> Repo.all()
   end
 
+  def get_totol_count do
+    Repo.aggregate(BlockedAccounta, :count, :id)
+  end
+
   @doc """
   Returns the list of blocked_accounts.
 

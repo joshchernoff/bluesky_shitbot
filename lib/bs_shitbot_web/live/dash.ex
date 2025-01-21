@@ -1,5 +1,4 @@
 defmodule BsShitbotWeb.Dash do
-  alias BsShitbot.BlockedAccounts.BlockedAccount
   use BsShitbotWeb, :live_view
 
   def render(assigns) do
@@ -11,7 +10,8 @@ defmodule BsShitbotWeb.Dash do
       </h1>
       <div class="mb-10 mx-auto text-center max-w-xl">
         <p class="font-semi-bold">
-          A Bluesky bot that automates a block list of accounts that spam follow.
+          A Bluesky bot that automates a block list of accounts that spam follow.<br />
+          🚫 Blocking {@total} accounts
         </p>
 
         <ul role="list" class="divide-y divide-zinc-100 py-6">
@@ -152,11 +152,17 @@ defmodule BsShitbotWeb.Dash do
 
   def mount(_params, _session, socket) do
     if connected?(socket), do: Phoenix.PubSub.subscribe(BsShitbot.PubSub, "blocks")
+    count = BsShitbot.BlockedAccounts.get_totol_count()
 
-    {:ok, socket |> stream(:blocks, BsShitbot.BlockedAccounts.last_20_blocked_accounts())}
+    {:ok,
+     socket
+     |> stream(:blocks, BsShitbot.BlockedAccounts.last_20_blocked_accounts())
+     |> assign(:total, count)}
   end
 
   def handle_info(block, socket) do
-    {:noreply, stream_insert(socket, :blocks, block, limit: 20, at: 0)}
+    count = BsShitbot.BlockedAccounts.get_totol_count()
+
+    {:noreply, stream_insert(socket, :blocks, block, limit: 20, at: 0) |> assign(:total, count)}
   end
 end
