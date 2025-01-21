@@ -72,8 +72,8 @@ defmodule BsShitbot.BlueskyClient.Lists do
     |> handle_batch_response()
   end
 
-  def mass_remove_users_from_list(rkeys, token, repo) do
-    rkeys
+  def mass_remove_users_from_list(dids, token, repo) do
+    dids
     |> Enum.map(&delete_listitem(token, repo, &1))
     |> handle_batch_response()
   end
@@ -106,7 +106,6 @@ defmodule BsShitbot.BlueskyClient.Lists do
               {:error, {:http_error, status, body}}
 
             {:error, reason} ->
-              # parse for bad actors and get the index from the error and return the did that failed.
               {:error, {:request_failed, reason}}
           end
         end)
@@ -121,14 +120,20 @@ defmodule BsShitbot.BlueskyClient.Lists do
     end
   end
 
-  def delete_listitem(token, repo, rkey) do
+  def delete_listitem(token, repo, did) do
+    %{uri: uri} = blocked = BsShitbot.BlockedAccounts.get_blocked_account_by_did(did)
+
+    BsShitbot.BlockedAccounts.update_blocked_account(blocked, %{
+      ignored_on: DateTime.utc_now() |> DateTime.truncate(:second)
+    })
+
     url = "#{@base_url}/com.atproto.repo.deleteRecord"
 
     body =
       %{
         "repo" => repo,
         "collection" => @listitem_collection,
-        "rkey" => rkey
+        "rkey" => uri |> String.split("/") |> List.last()
       }
 
     headers = [{"Authorization", "Bearer #{token}"}]

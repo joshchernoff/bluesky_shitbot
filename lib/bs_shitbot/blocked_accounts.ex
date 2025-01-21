@@ -15,7 +15,8 @@ defmodule BsShitbot.BlockedAccounts do
     from(
       ba in BlockedAccount,
       where: ilike(ba.did, ^"%#{q}%") or ilike(ba.handle, ^"%#{q}%"),
-      limit: 10,
+      where: is_nil(ba.ignored_on),
+      limit: 20,
       order_by:
         fragment(
           "CASE
@@ -32,13 +33,18 @@ defmodule BsShitbot.BlockedAccounts do
     |> Repo.all()
   end
 
-  def last_20_blocked_accounts do
-    from(b in BlockedAccount, order_by: [desc: b.inserted_at], limit: 20)
+  def last_100_blocked_accounts do
+    from(b in BlockedAccount,
+      where: is_nil(b.ignored_on),
+      order_by: [desc: b.inserted_at],
+      limit: 100
+    )
     |> Repo.all()
   end
 
   def get_totol_count do
-    Repo.aggregate(BlockedAccount, :count, :id)
+    from(b in BlockedAccount, where: is_nil(b.ignored_on))
+    |> Repo.aggregate(:count, :id)
   end
 
   @doc """
@@ -71,6 +77,7 @@ defmodule BsShitbot.BlockedAccounts do
   def get_blocked_account!(id), do: Repo.get!(BlockedAccount, id)
 
   def get_blocked_account_by_handle(handle), do: Repo.get_by!(BlockedAccount, %{handle: handle})
+  def get_blocked_account_by_did(did), do: Repo.get_by!(BlockedAccount, %{did: did})
 
   def upsert!(%{did: did, uri: uri} = blocked_record) do
     handle = Map.get(blocked_record, :handle, nil)

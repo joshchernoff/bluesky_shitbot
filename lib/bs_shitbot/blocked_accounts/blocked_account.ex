@@ -16,6 +16,7 @@ defmodule BsShitbot.BlockedAccounts.BlockedAccount do
     field :banner, :string
     field :description, :string
     field :account_created_on, :utc_datetime
+    field :ignored_on, :utc_datetime
 
     field :state, :string, virtual: true
 
@@ -36,7 +37,8 @@ defmodule BsShitbot.BlockedAccounts.BlockedAccount do
       :display_name,
       :banner,
       :description,
-      :account_created_on
+      :account_created_on,
+      :ignored_on
     ])
     |> validate_required([
       :did,

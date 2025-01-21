@@ -187,7 +187,7 @@ defmodule BsShitbotWeb.Dash do
 
     {:ok,
      socket
-     |> stream(:blocks, BsShitbot.BlockedAccounts.last_20_blocked_accounts())
+     |> stream(:blocks, BsShitbot.BlockedAccounts.last_100_blocked_accounts())
      |> assign(:total, count)
      |> assign(:q, nil)}
   end
@@ -195,7 +195,7 @@ defmodule BsShitbotWeb.Dash do
   def handle_event("search", %{"query" => ""}, socket) do
     {:noreply,
      socket
-     |> stream(:blocks, BsShitbot.BlockedAccounts.last_20_blocked_accounts(), reset: true)
+     |> stream(:blocks, BsShitbot.BlockedAccounts.last_100_blocked_accounts(), reset: true)
      |> assign(:q, nil)}
   end
 
@@ -210,7 +210,8 @@ defmodule BsShitbotWeb.Dash do
     if socket.assigns.q do
       {:noreply, socket}
     else
-      {:noreply, stream_insert(socket, :blocks, block, limit: 20, at: 0) |> assign(:total, count)}
+      {:noreply,
+       stream_insert(socket, :blocks, block, limit: 100, at: 0) |> assign(:total, count)}
     end
   end
 
