@@ -14,7 +14,7 @@ defmodule BsShitbot.BlockedAccounts do
   end
 
   def get_totol_count do
-    Repo.aggregate(BlockedAccounta, :count, :id)
+    Repo.aggregate(BlockedAccount, :count, :id)
   end
 
   @doc """
