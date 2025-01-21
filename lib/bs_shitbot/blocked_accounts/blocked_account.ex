@@ -13,6 +13,10 @@ defmodule BsShitbot.BlockedAccounts.BlockedAccount do
     field :following_count, :integer
     field :followers_count, :integer
     field :avatar_uri, :string
+    field :banner, :string
+    field :description, :string
+    field :account_created_on, :utc_datetime
+
     field :state, :string, virtual: true
 
     timestamps(type: :utc_datetime)
@@ -29,7 +33,10 @@ defmodule BsShitbot.BlockedAccounts.BlockedAccount do
       :following_count,
       :followers_count,
       :avatar_uri,
-      :display_name
+      :display_name,
+      :banner,
+      :description,
+      :account_created_on
     ])
     |> validate_required([
       :did,

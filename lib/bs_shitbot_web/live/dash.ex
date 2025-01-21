@@ -4,7 +4,7 @@ defmodule BsShitbotWeb.Dash do
   def render(assigns) do
     ~H"""
     <div class="mx-auto text-center max-w-3xl">
-      <img src={~p"/images/bot.webp"} class="rounded-full w-40 h-40 mx-auto mb-2 shadow-xl" />
+      <img src={~p"/images/bot.webp"} class="rounded-full w-32 h-32 mx-auto mb-2 shadow-xl" />
       <h1 class="mb-2 mt-2 text-2xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-3xl">
         💩 Shitbots & Shitbirds 🤖
       </h1>
@@ -101,49 +101,80 @@ defmodule BsShitbotWeb.Dash do
       </div>
     </div>
 
-    <div :if={!(@streams.blocks.inserts == [])} class="text-center mx-auto">
-      📈 LIVE BLOCK FEED
-    </div>
-    <ul id="blocks" phx-update="stream" role="list" class="divide-y divide-gray-100 mx-auto max-w-xl">
-      <li :for={{id, block} <- @streams.blocks} id={id} class="flex justify-between gap-x-6 py-5">
-        <div class="flex min-w-0 gap-x-4">
-          <a href={"https://bsky.app/profile/#{block.handle}"}>
-            <img class="size-32 flex-none rounded-full bg-gray-50" src={block.avatar_uri} alt="" />
-          </a>
-          <div class="min-w-0 flex-auto">
-            <p class="text-sm/6 font-semibold text-gray-900">
-              <a href={"https://bsky.app/profile/#{block.handle}"}>{block.handle}</a>
-            </p>
-            <p class="mt-1 truncate text-xs/5 text-gray-500">
-              Follow back rate: {block.followers_count / block.following_count}
-            </p>
-            <p class="mt-1 truncate text-xs/5 text-gray-500">
-              Post rate per 1k: {block.posts_count / block.following_count}
-            </p>
-            <p class="mt-1 truncate text-xs/5 text-gray-500">
-              <span class="inline-flex items-center rounded-md bg-pink-50 px-2 py-1 text-xs font-medium text-pink-700 ring-1 ring-inset ring-pink-700/10">
-                Blocked On: {block.inserted_at}
+    <div class="mx-auto px-6 lg:px-8 max-w-7xl">
+      <div class="mx-auto max-w-2xl text-center">
+        <.search_field id="block_search" value={nil} />
+
+        <div :if={!(@streams.blocks.inserts == [])} class="text-center mx-auto">
+          📈 LIVE BLOCK FEED
+        </div>
+      </div>
+
+      <div
+        id="blocks"
+        phx-update="stream"
+        class="mx-auto mt-16 grid max-w-2xl grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none xl:grid-cols-3"
+      >
+        <article
+          :for={{id, block} <- @streams.blocks}
+          id={id}
+          class="flex flex-col items-start justify-between bg-white shadow-xl rounded-t-2xl"
+        >
+          <div class="relative w-full">
+            <a href={"https://bsky.app/profile/#{block.handle}"}>
+              <img
+                src={block.banner || ~p"/images/bot.webp"}
+                alt=""
+                class="aspect-video w-full rounded-t-2xl bg-gray-100 object-cover aspect-[4/1]"
+              />
+            </a>
+            <div class="relative mt-4 flex items-center gap-x-4 pb-4 px-4">
+              <img src={block.avatar_uri} alt="" class="size-10 rounded-full bg-zin-100" />
+              <div class="text-sm/6">
+                <p class="font-semibold text-gray-900">
+                  <a href={"https://bsky.app/profile/#{block.handle}"}>
+                    <span class="absolute inset-0"></span>
+                    {block.handle}
+                  </a>
+                </p>
+                <p class="text-gray-600">Acct Created On: {block.account_created_on}</p>
+              </div>
+            </div>
+
+            <div class="max-w-xl px-4">
+              <span class="mb-2 inline-block items-center rounded-md bg-pink-50 px-2 py-1 text-xs font-medium text-pink-700 ring-1 ring-inset ring-pink-700/10">
+                Blocked on: {block.inserted_at}
               </span>
-            </p>
+
+              <span class="mb-2  inline-block items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                Following: {block.following_count}
+              </span>
+
+              <span class="mb-2 inline-block items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">
+                Follower: {block.followers_count}
+              </span>
+
+              <span class="mb-2 inline-block items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                Posts: {block.posts_count}
+              </span>
+
+              <span class="inline-block items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                RKEY: {block.uri |> String.split("/") |> List.last()}
+              </span>
+            </div>
           </div>
-        </div>
-        <div class="hidden shrink-0 sm:flex sm:flex-col sm:items-end">
-          <p class="text-sm/6 text-gray-900">Following: {block.following_count}</p>
-          <p class="mt-1 text-sm/6 text-gray-900">Followers: {block.followers_count}</p>
-          <p class="mt-1 text-sm/6 text-gray-900">Posts: {block.posts_count}</p>
-          <p :if={block.state == :update} class="mt-1 text-sm/6 text-gray-900">
-            <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">
-              Updated Counts
-            </span>
-          </p>
-          <p :if={block.state == :new} class="mt-1 text-sm/6 text-gray-900">
-            <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-800 ring-1 ring-inset ring-green-600/20">
-              New Block
-            </span>
-          </p>
-        </div>
-      </li>
-    </ul>
+
+          <div :if={block.description} class="max-w-xl p-4">
+            <div class="group relative">
+              <p class="line-clamp-3 text-sm/6 text-gray-600">
+                {block.description}
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
     <div :if={@streams.blocks.inserts == []} class="text-center mx-auto">
       Loading Feed... Please wait
     </div>
@@ -157,12 +188,58 @@ defmodule BsShitbotWeb.Dash do
     {:ok,
      socket
      |> stream(:blocks, BsShitbot.BlockedAccounts.last_20_blocked_accounts())
-     |> assign(:total, count)}
+     |> assign(:total, count)
+     |> assign(:q, nil)}
+  end
+
+  def handle_event("search", %{"query" => ""}, socket) do
+    {:noreply,
+     socket
+     |> stream(:blocks, BsShitbot.BlockedAccounts.last_20_blocked_accounts(), reset: true)
+     |> assign(:q, nil)}
+  end
+
+  def handle_event("search", %{"query" => query}, socket) do
+    search_results = BsShitbot.BlockedAccounts.search(query) |> dbg()
+    {:noreply, socket |> stream(:blocks, search_results, reset: true) |> assign(:q, query)}
   end
 
   def handle_info(block, socket) do
     count = BsShitbot.BlockedAccounts.get_totol_count()
 
-    {:noreply, stream_insert(socket, :blocks, block, limit: 20, at: 0) |> assign(:total, count)}
+    if socket.assigns.q do
+      {:noreply, socket}
+    else
+      {:noreply, stream_insert(socket, :blocks, block, limit: 20, at: 0) |> assign(:total, count)}
+    end
+  end
+
+  attr :id, :string, required: true
+  attr :value, :any, required: true
+
+  defp search_field(assigns) do
+    ~H"""
+    <div class="flex gap-2 items-center justify-between max-w-lg mx-auto my-10">
+      <div class="w-full">
+        <label for="search" class="sr-only">Search</label>
+        <div class="relative w-full text-zinc-400 dark:text-zinc-600 focus-within:text-zinc-600 dark:focus-within:text-zinc-400">
+          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <.icon name="hero-magnifying-glass" />
+          </div>
+          <form phx-change="search" onkeydown="return event.key != 'Enter';">
+            <input
+              id={"#{@id}-search-field"}
+              class="w-full shadow-md text-zinc-900 rounded-md border-0 bg-zinc-100 py-1.5 pl-10 pr-3 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              placeholder="Search handle or DID"
+              type="search"
+              name="query"
+              value={@value}
+              phx-debounce="500"
+            />
+          </form>
+        </div>
+      </div>
+    </div>
+    """
   end
 end

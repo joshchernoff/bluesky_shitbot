@@ -194,18 +194,26 @@ defmodule BsShitbot.BlueskyClient.Lists do
       avatar_uri: Map.get(profile, "avatar", nil),
       posts_count: Map.get(profile, "postsCount", nil),
       following_count: Map.get(profile, "followsCount", nil),
-      followers_count: Map.get(profile, "followersCount", nil)
+      followers_count: Map.get(profile, "followersCount", nil),
+      banner: Map.get(profile, "banner", nil),
+      description: Map.get(profile, "description", nil),
+      account_created_on: Map.get(profile, "createdAt", nil)
     }
   end
 
   defp parse_profile(profile) do
+    dbg(profile)
+
     %{
       handle: Map.get(profile, "handle", nil),
       display_name: Map.get(profile, "displayName", nil),
       avatar_uri: Map.get(profile, "avatar", nil),
       posts_count: Map.get(profile, "postsCount", nil),
       following_count: Map.get(profile, "followsCount", nil),
-      followers_count: Map.get(profile, "followersCount", nil)
+      followers_count: Map.get(profile, "followersCount", nil),
+      banner: Map.get(profile, "banner", nil),
+      description: Map.get(profile, "description", nil),
+      account_created_on: Map.get(profile, "createdAt", nil)
     }
   end
 end

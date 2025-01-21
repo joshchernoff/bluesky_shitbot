@@ -56,6 +56,8 @@ defmodule BsShitbot.IdentUpdatePipeline do
   end
 
   defp parse_profile(profile, uri) do
+    dbg(profile)
+
     %{
       did: profile["did"],
       uri: uri,
@@ -64,7 +66,10 @@ defmodule BsShitbot.IdentUpdatePipeline do
       avatar_uri: Map.get(profile, "avatar", nil),
       posts_count: Map.get(profile, "postsCount", nil),
       following_count: Map.get(profile, "followsCount", nil),
-      followers_count: Map.get(profile, "followersCount", nil)
+      followers_count: Map.get(profile, "followersCount", nil),
+      description: Map.get(profile, "description", nil),
+      banner: Map.get(profile, "banner", nil),
+      account_created_on: Map.get(profile, "createdAt", nil)
     }
   end
 end

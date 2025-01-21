@@ -12,6 +12,7 @@ jwt_fn = fn creds ->
 end
 
 ident_resolver_fn = fn id -> BsShitbot.BlueskyClient.IdentResolver.resolve_did(id) end
+get_profile_fn = fn did -> BsShitbot.BlueskyClient.IdentResolver.get_profiles([did]) end
 
 process_dids_fn = fn dids ->
   Enum.chunk_every(dids, 20) |> BsShitbot.DidProducer.process_dids()

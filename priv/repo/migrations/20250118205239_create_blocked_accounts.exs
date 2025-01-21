@@ -12,6 +12,9 @@ defmodule BsShitbot.Repo.Migrations.CreateBlockedAccounts do
       add :following_count, :integer
       add :followers_count, :integer
       add :avatar_uri, :text
+      add :description, :text
+      add :banner, :text
+      add :account_created_on, :utc_datetime
 
       timestamps(type: :utc_datetime)
     end

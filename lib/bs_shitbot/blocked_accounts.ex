@@ -8,6 +8,30 @@ defmodule BsShitbot.BlockedAccounts do
 
   alias BsShitbot.BlockedAccounts.BlockedAccount
 
+  def search(nil), do: []
+  def search(""), do: []
+
+  def search(q) do
+    from(
+      ba in BlockedAccount,
+      where: ilike(ba.did, ^"%#{q}%") or ilike(ba.handle, ^"%#{q}%"),
+      limit: 10,
+      order_by:
+        fragment(
+          "CASE
+       WHEN ? ILIKE ? THEN 1
+       WHEN ? ILIKE ? THEN 2
+       ELSE 3
+     END",
+          ba.did,
+          ^"%#{q}%",
+          ba.handle,
+          ^"%#{q}%"
+        )
+    )
+    |> Repo.all()
+  end
+
   def last_20_blocked_accounts do
     from(b in BlockedAccount, order_by: [desc: b.inserted_at], limit: 20)
     |> Repo.all()
@@ -55,6 +79,17 @@ defmodule BsShitbot.BlockedAccounts do
     posts_count = Map.get(blocked_record, :posts_count, nil)
     following_count = Map.get(blocked_record, :following_count, nil)
     followers_count = Map.get(blocked_record, :followers_count, nil)
+    description = Map.get(blocked_record, :description, nil)
+    banner = Map.get(blocked_record, :banner, nil)
+
+    account_created_on =
+      case DateTime.from_iso8601(Map.get(blocked_record, :account_created_on, nil)) do
+        {:ok, datetime, 0} ->
+          DateTime.truncate(datetime, :second)
+
+        {:error, _reason} ->
+          nil
+      end
 
     query =
       from(d in BsShitbot.BlockedAccounts.BlockedAccount,
@@ -66,7 +101,10 @@ defmodule BsShitbot.BlockedAccounts do
             display_name: ^display_name,
             posts_count: ^posts_count,
             following_count: ^following_count,
-            followers_count: ^followers_count
+            followers_count: ^followers_count,
+            description: ^description,
+            banner: ^banner,
+            account_created_on: ^account_created_on
           ]
         ]
       )
@@ -80,7 +118,10 @@ defmodule BsShitbot.BlockedAccounts do
         avatar_uri: avatar_uri,
         posts_count: posts_count,
         following_count: following_count,
-        followers_count: followers_count
+        followers_count: followers_count,
+        description: description,
+        banner: banner,
+        account_created_on: account_created_on
       },
       on_conflict: query,
       conflict_target: [:did]
