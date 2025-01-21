@@ -4,9 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title default="BsShitbot" suffix=" · Phoenix Framework">
+    <.live_title default="Bluesky shitbot block list">
       {assigns[:page_title]}
     </.live_title>
+    <meta property="og:title" content="Bluesky shitbot block list" />
+    <meta
+      property="og:description"
+      content="A bot that auto blocks accounts that are mass following others"
+    />
+    <meta property="og:type" content="page" />
+    <meta property="og:url" content="https://shitbot.morphic.pro" />
+    <meta property="og:image" content="https://shitbot.morphic.pro/images/bot.webp" />
+    <meta property="og:site_name" content="Bluesky shitbot block listt" />
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
     </script>
