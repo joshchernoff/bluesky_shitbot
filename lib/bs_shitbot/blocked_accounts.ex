@@ -8,6 +8,11 @@ defmodule BsShitbot.BlockedAccounts do
 
   alias BsShitbot.BlockedAccounts.BlockedAccount
 
+  def last_20_blocked_accounts do
+    from(b in BlockedAccount, order_by: [desc: b.inserted_at], limit: 20)
+    |> Repo.all()
+  end
+
   @doc """
   Returns the list of blocked_accounts.
 

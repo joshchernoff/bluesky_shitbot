@@ -1,4 +1,5 @@
 defmodule BsShitbotWeb.Dash do
+  alias BsShitbot.BlockedAccounts.BlockedAccount
   use BsShitbotWeb, :live_view
 
   def render(assigns) do
@@ -153,7 +154,7 @@ defmodule BsShitbotWeb.Dash do
   def mount(_params, _session, socket) do
     if connected?(socket), do: Phoenix.PubSub.subscribe(BsShitbot.PubSub, "blocks")
 
-    {:ok, socket |> stream(:blocks, [])}
+    {:ok, socket |> stream(:blocks, BlockedAccounts.last_20_blocked_accounts())}
   end
 
   def handle_info(block, socket) do
