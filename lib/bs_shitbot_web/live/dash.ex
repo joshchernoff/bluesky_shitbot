@@ -17,7 +17,7 @@ defmodule BsShitbotWeb.Dash do
         <ul role="list" class="divide-y divide-zinc-100 py-6">
           <li class="flex justify-center py-4 font-bold text-lg">
             <span class="flex">
-              🤔 How does this bot decided to add accounts to the list?
+              🤔 How does this bot decide to add accounts to the list?
             </span>
           </li>
 
