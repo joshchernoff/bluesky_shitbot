@@ -8,9 +8,6 @@ defmodule BsShitbot.BlockedAccounts do
 
   alias BsShitbot.BlockedAccounts.BlockedAccount
 
-  def search(q) do
-  end
-
   def lastest_blocked_accounts do
     from(b in BlockedAccount,
       where: is_nil(b.ignored_on),

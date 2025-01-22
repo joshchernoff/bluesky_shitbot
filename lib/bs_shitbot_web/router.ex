@@ -17,12 +17,6 @@ defmodule BsShitbotWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", BsShitbotWeb do
-    pipe_through :browser
-
-    live "/", Dash, :index
-  end
-
   # Other scopes may use custom stacks.
   # scope "/api", BsShitbotWeb do
   #   pipe_through :api
@@ -80,6 +74,7 @@ defmodule BsShitbotWeb.Router do
       on_mount: [{BsShitbotWeb.UserAuth, :mount_current_user}] do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
+      live "/", Dash, :index
     end
   end
 end

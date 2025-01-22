@@ -9,6 +9,7 @@ defmodule BsShitbot.Repo.Migrations.CreateUsersAuthTables do
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
       add :confirmed_at, :utc_datetime
+      add :admin, :boolean, default: false, null: false
 
       timestamps(type: :utc_datetime)
     end

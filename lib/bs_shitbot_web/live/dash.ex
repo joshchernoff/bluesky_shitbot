@@ -1,5 +1,7 @@
 defmodule BsShitbotWeb.Dash do
   use BsShitbotWeb, :live_view
+  import Timex
+
   alias BsShitbot.BlockedAccounts
 
   def render(assigns) do
@@ -23,13 +25,33 @@ defmodule BsShitbotWeb.Dash do
           </li>
 
           <li class="py-4">
-            Accounts that follow more than 1000 other accounts,<br />
+            🚩 Accounts that follow more than 1000 other accounts,<br />
             but also has less than 0.1% blocks. (IE 1000:1, 10_000:10)
           </li>
 
           <li class="py-4">
-            Additionally accounts following more than 200 other accounts,<br />
+            🚩Additionally accounts following more than 200 other accounts,<br />
             but also has less than a 1% follow back count. (IE 200:2, 1000:10)
+          </li>
+
+          <li class="py-4">
+            🔞 Warning The Content on this site by nature is NSFW 🔞
+          </li>
+
+          <li class="py-4">
+            🧑‍⚖️ Given this is an automated list, it sometimes makes mistakes. 🤷<br />
+            If you have been added to the list and wish to appeal, firts check the list again by using the search and locate your account.
+            If you don't see your account it's likely because we cought the false positive after adding you and removed you already.
+            If you find your account and wish for us to remove you, simply ask the bot at on bluesky.
+            <br />
+            <a href="https://bsky.app/profile/bs-shitbot.bsky.social" class="inline-block mt-4">
+              <button
+                type="button"
+                class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+              >
+                🤖 bs-shitbot.bsky.social
+              </button>
+            </a>
           </li>
         </ul>
 
@@ -122,10 +144,10 @@ defmodule BsShitbotWeb.Dash do
         <article
           :for={{id, block} <- @streams.blocks}
           id={id}
-          class="flex flex-col items-start justify-between bg-white shadow-xl rounded-t-2xl"
+          class="flex flex-col items-start justify-between bg-white shadow-lg rounded-2xl pb-4"
         >
           <div class="relative w-full">
-            <a href={"https://bsky.app/profile/#{block.handle}"}>
+            <a href={"https://bsky.app/profile/#{block.handle}"} target="blank">
               <img
                 src={block.banner || block.avatar_uri || ~p"/images/bot.webp"}
                 alt=""
@@ -133,23 +155,28 @@ defmodule BsShitbotWeb.Dash do
               />
             </a>
             <div class="relative mt-4 flex items-center gap-x-4 pb-4 px-4">
-              <img src={block.avatar_uri} alt="" class="size-10 rounded-full bg-zin-100" />
+              <img
+                src={block.avatar_uri || ~p"/images/bot.webp"}
+                alt=""
+                class="size-10 rounded-full bg-zin-100"
+              />
               <div class="text-sm/6">
                 <p class="font-semibold text-gray-900">
-                  <a href={"https://bsky.app/profile/#{block.handle}"}>
+                  <a href={"https://bsky.app/profile/#{block.handle}"} target="blank">
                     <span class="absolute inset-0"></span>
                     {block.handle}
                   </a>
                 </p>
-                <p class="text-gray-600">Acct Created On: {block.account_created_on}</p>
+                <p class="text-gray-600">{block.display_name}</p>
+                <p :if={!block.display_name} class="text-gray-600">
+                  <span class="opacity-30 inline-flex items-center rounded-md bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
+                    NO DISPLAY NAME
+                  </span>
+                </p>
               </div>
             </div>
 
             <div class="max-w-xl px-4">
-              <span class="mb-2 inline-block items-center rounded-md bg-pink-50 px-2 py-1 text-xs font-medium text-pink-700 ring-1 ring-inset ring-pink-700/10">
-                Blocked on: {block.inserted_at}
-              </span>
-
               <span class="mb-2  inline-block items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
                 Following: {block.following_count}
               </span>
@@ -162,8 +189,12 @@ defmodule BsShitbotWeb.Dash do
                 Posts: {block.posts_count}
               </span>
 
-              <span class="inline-block items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                RKEY: {block.uri |> String.split("/") |> List.last()}
+              <span class="inline-flex items-center rounded-md bg-yellow-400/10 px-2 py-1 text-xs font-medium text-yellow-500 ring-1 ring-inset ring-yellow-400/20">
+                Acct Created: {block.account_created_on |> time_ago()}
+              </span>
+
+              <span class="mb-2 inline-block items-center rounded-md bg-pink-50 px-2 py-1 text-xs font-medium text-pink-700 ring-1 ring-inset ring-pink-700/10">
+                Blocked: {block.inserted_at |> time_ago()}
               </span>
             </div>
           </div>
@@ -205,8 +236,7 @@ defmodule BsShitbotWeb.Dash do
     if socket.assigns.q do
       {:noreply, socket}
     else
-      {:noreply,
-       stream_insert(socket, :blocks, block, limit: 100, at: 0) |> assign(:total, count)}
+      {:noreply, stream_insert(socket, :blocks, block, at: 0) |> assign(:total, count)}
     end
   end
 
@@ -303,5 +333,9 @@ defmodule BsShitbotWeb.Dash do
       </div>
     </div>
     """
+  end
+
+  defp time_ago(some_past_time) do
+    Timex.format!(some_past_time, "{relative}", :relative)
   end
 end

@@ -62,7 +62,8 @@ defmodule BsShitbot.MixProject do
       {:req, "~> 0.5.7"},
       {:websockex, "~> 0.4.3"},
       {:broadway, "~> 1.1"},
-      {:flow, "~> 1.2"}
+      {:flow, "~> 1.2"},
+      {:timex, "~> 3.7"}
     ]
   end
 
