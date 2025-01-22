@@ -127,7 +127,7 @@ defmodule BsShitbotWeb.Dash do
           <div class="relative w-full">
             <a href={"https://bsky.app/profile/#{block.handle}"}>
               <img
-                src={block.banner || ~p"/images/bot.webp"}
+                src={block.banner || block.avatar_uri || ~p"/images/bot.webp"}
                 alt=""
                 class="aspect-video w-full rounded-t-2xl bg-gray-100 object-cover aspect-[4/1]"
               />
