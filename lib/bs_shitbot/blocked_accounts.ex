@@ -33,7 +33,7 @@ defmodule BsShitbot.BlockedAccounts do
     |> Repo.all()
   end
 
-  def last_100_blocked_accounts do
+  def lastest_blocked_accounts do
     from(b in BlockedAccount,
       where: is_nil(b.ignored_on),
       order_by: [desc: b.inserted_at],
@@ -45,6 +45,16 @@ defmodule BsShitbot.BlockedAccounts do
   def get_totol_count do
     from(b in BlockedAccount, where: is_nil(b.ignored_on))
     |> Repo.aggregate(:count, :id)
+  end
+
+  def paginate_blocks(offset: offset, limit: limit) do
+    from(b in BlockedAccount,
+      where: is_nil(b.ignored_on),
+      limit: ^limit,
+      offset: ^offset,
+      order_by: [desc: b.inserted_at]
+    )
+    |> Repo.all()
   end
 
   @doc """

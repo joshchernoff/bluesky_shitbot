@@ -1,5 +1,6 @@
 defmodule BsShitbotWeb.Dash do
   use BsShitbotWeb, :live_view
+  alias BsShitbot.BlockedAccounts
 
   def render(assigns) do
     ~H"""
@@ -23,7 +24,7 @@ defmodule BsShitbotWeb.Dash do
 
           <li class="py-4">
             Accounts that follow more than 1000 other accounts,<br />
-            but also has less than 0.1% Posts. (IE 1000:1, 10_000:10)
+            but also has less than 0.1% blocks. (IE 1000:1, 10_000:10)
           </li>
 
           <li class="py-4">
@@ -113,6 +114,9 @@ defmodule BsShitbotWeb.Dash do
       <div
         id="blocks"
         phx-update="stream"
+        phx-viewport-top={@page > 1 && "prev-page"}
+        phx-viewport-bottom={!@end_of_timeline? && "next-page"}
+        phx-page-loading
         class="mx-auto mt-16 grid max-w-2xl grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none xl:grid-cols-3"
       >
         <article
@@ -172,6 +176,9 @@ defmodule BsShitbotWeb.Dash do
             </div>
           </div>
         </article>
+        <div :if={@end_of_timeline?} class="mt-5 text-[50px] text-center">
+          🎉 You made it to the beginning of time 🎉
+        </div>
       </div>
     </div>
 
@@ -187,31 +194,75 @@ defmodule BsShitbotWeb.Dash do
 
     {:ok,
      socket
-     |> stream(:blocks, BsShitbot.BlockedAccounts.last_100_blocked_accounts())
+     |> assign(page: 1, per_page: 20)
+     |> assign_paginate_blocks(1)
      |> assign(:total, count)
      |> assign(:q, nil)}
   end
 
-  def handle_event("search", %{"query" => ""}, socket) do
-    {:noreply,
-     socket
-     |> stream(:blocks, BsShitbot.BlockedAccounts.last_100_blocked_accounts(), reset: true)
-     |> assign(:q, nil)}
-  end
-
-  def handle_event("search", %{"query" => query}, socket) do
-    search_results = BsShitbot.BlockedAccounts.search(query) |> dbg()
-    {:noreply, socket |> stream(:blocks, search_results, reset: true) |> assign(:q, query)}
-  end
-
   def handle_info(block, socket) do
-    count = BsShitbot.BlockedAccounts.get_totol_count()
+    count = BlockedAccounts.get_totol_count()
 
     if socket.assigns.q do
       {:noreply, socket}
     else
       {:noreply,
        stream_insert(socket, :blocks, block, limit: 100, at: 0) |> assign(:total, count)}
+    end
+  end
+
+  def handle_event("search", %{"query" => ""}, socket) do
+    {:noreply,
+     socket
+     |> assign(page: 1, per_page: 20)
+     |> stream(:blocks, BlockedAccounts.lastest_blocked_accounts(), reset: true)
+     |> assign(:q, nil)}
+  end
+
+  def handle_event("search", %{"query" => query}, socket) do
+    {:noreply,
+     socket
+     |> assign(page: 1, per_page: 20)
+     |> stream(:blocks, BlockedAccounts.search(query), reset: true)
+     |> assign(:q, query)}
+  end
+
+  def handle_event("next-page", _, socket) do
+    {:noreply, assign_paginate_blocks(socket, socket.assigns.page + 1)}
+  end
+
+  def handle_event("prev-page", %{"_overran" => true}, socket) do
+    {:noreply, assign_paginate_blocks(socket, 1)}
+  end
+
+  def handle_event("prev-page", _, socket) do
+    if socket.assigns.page > 1 do
+      {:noreply, assign_paginate_blocks(socket, socket.assigns.page - 1)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  defp assign_paginate_blocks(socket, new_page) when new_page >= 1 do
+    %{per_page: per_page, page: cur_page} = socket.assigns
+    blocks = BlockedAccounts.paginate_blocks(offset: (new_page - 1) * per_page, limit: per_page)
+
+    {blocks, at, limit} =
+      if new_page >= cur_page do
+        {blocks, -1, per_page * 3 * -1}
+      else
+        {Enum.reverse(blocks), 0, per_page * 3}
+      end
+
+    case blocks do
+      [] ->
+        assign(socket, end_of_timeline?: at == -1)
+
+      [_ | _] = blocks ->
+        socket
+        |> assign(end_of_timeline?: false)
+        |> assign(:page, new_page)
+        |> stream(:blocks, blocks, at: at, limit: limit)
     end
   end
 
