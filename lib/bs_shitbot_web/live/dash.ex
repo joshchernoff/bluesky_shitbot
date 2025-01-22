@@ -176,12 +176,11 @@ defmodule BsShitbotWeb.Dash do
             </div>
           </div>
         </article>
-        <div :if={@end_of_timeline?} class="mt-5 text-[50px] text-center">
-          🎉 You made it to the beginning of time 🎉
-        </div>
       </div>
     </div>
-
+    <div :if={@end_of_timeline?} class="mt-5 text-[50px] text-center">
+      🎉 You made it to the beginning of time 🎉
+    </div>
     <div :if={@streams.blocks.inserts == []} class="text-center mx-auto">
       Loading Feed... Please wait
     </div>
