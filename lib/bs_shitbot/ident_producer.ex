@@ -11,7 +11,6 @@ defmodule BsShitbot.IdentProducer do
   def process_dids(dids) when is_list(dids) do
     IdentUpdatePipeline
     |> Broadway.producer_names()
-    |> dbg()
     |> List.first()
     |> GenStage.cast({:dids, dids})
   end

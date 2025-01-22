@@ -56,8 +56,6 @@ defmodule BsShitbot.IdentUpdatePipeline do
   end
 
   defp parse_profile(profile, uri) do
-    dbg(profile)
-
     %{
       did: profile["did"],
       uri: uri,

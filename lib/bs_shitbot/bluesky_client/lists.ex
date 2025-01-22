@@ -207,8 +207,6 @@ defmodule BsShitbot.BlueskyClient.Lists do
   end
 
   defp parse_profile(profile) do
-    dbg(profile)
-
     %{
       handle: Map.get(profile, "handle", nil),
       display_name: Map.get(profile, "displayName", nil),

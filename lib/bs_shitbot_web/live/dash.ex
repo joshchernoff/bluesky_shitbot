@@ -195,9 +195,9 @@ defmodule BsShitbotWeb.Dash do
     {:ok,
      socket
      |> assign(page: 1, per_page: 20)
+     |> assign(:q, nil)
      |> assign_paginate_blocks(1)
-     |> assign(:total, count)
-     |> assign(:q, nil)}
+     |> assign(:total, count)}
   end
 
   def handle_info(block, socket) do
@@ -215,37 +215,48 @@ defmodule BsShitbotWeb.Dash do
     {:noreply,
      socket
      |> assign(page: 1, per_page: 20)
-     |> stream(:blocks, BlockedAccounts.lastest_blocked_accounts(), reset: true)
-     |> assign(:q, nil)}
+     |> assign(:q, nil)
+     |> stream(:blocks, [], reset: true)
+     |> assign_paginate_blocks(1, nil)}
   end
 
   def handle_event("search", %{"query" => query}, socket) do
     {:noreply,
      socket
      |> assign(page: 1, per_page: 20)
-     |> stream(:blocks, BlockedAccounts.search(query), reset: true)
-     |> assign(:q, query)}
+     |> assign(:q, query)
+     |> stream(:blocks, [], reset: true)
+     |> assign_paginate_blocks(1, query)}
   end
 
   def handle_event("next-page", _, socket) do
-    {:noreply, assign_paginate_blocks(socket, socket.assigns.page + 1)}
+    %{page: page, q: q} = socket.assigns
+    {:noreply, assign_paginate_blocks(socket, page + 1, q)}
   end
 
   def handle_event("prev-page", %{"_overran" => true}, socket) do
-    {:noreply, assign_paginate_blocks(socket, 1)}
+    {:noreply, assign_paginate_blocks(socket, 1, socket.assigns.q)}
   end
 
   def handle_event("prev-page", _, socket) do
     if socket.assigns.page > 1 do
-      {:noreply, assign_paginate_blocks(socket, socket.assigns.page - 1)}
+      %{page: page, q: q} = socket.assigns
+
+      {:noreply, assign_paginate_blocks(socket, page - 1, q)}
     else
       {:noreply, socket}
     end
   end
 
-  defp assign_paginate_blocks(socket, new_page) when new_page >= 1 do
+  defp assign_paginate_blocks(socket, new_page, query \\ nil) when new_page >= 1 do
     %{per_page: per_page, page: cur_page} = socket.assigns
-    blocks = BlockedAccounts.paginate_blocks(offset: (new_page - 1) * per_page, limit: per_page)
+
+    blocks =
+      BlockedAccounts.paginate_blocks(
+        q: query,
+        offset: (new_page - 1) * per_page,
+        limit: per_page
+      )
 
     {blocks, at, limit} =
       if new_page >= cur_page do

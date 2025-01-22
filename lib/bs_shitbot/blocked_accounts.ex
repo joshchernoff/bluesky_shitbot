@@ -8,29 +8,7 @@ defmodule BsShitbot.BlockedAccounts do
 
   alias BsShitbot.BlockedAccounts.BlockedAccount
 
-  def search(nil), do: []
-  def search(""), do: []
-
   def search(q) do
-    from(
-      ba in BlockedAccount,
-      where: ilike(ba.did, ^"%#{q}%") or ilike(ba.handle, ^"%#{q}%"),
-      where: is_nil(ba.ignored_on),
-      limit: 20,
-      order_by:
-        fragment(
-          "CASE
-       WHEN ? ILIKE ? THEN 1
-       WHEN ? ILIKE ? THEN 2
-       ELSE 3
-     END",
-          ba.did,
-          ^"%#{q}%",
-          ba.handle,
-          ^"%#{q}%"
-        )
-    )
-    |> Repo.all()
   end
 
   def lastest_blocked_accounts do
@@ -47,12 +25,24 @@ defmodule BsShitbot.BlockedAccounts do
     |> Repo.aggregate(:count, :id)
   end
 
-  def paginate_blocks(offset: offset, limit: limit) do
+  def paginate_blocks(nil, offset: offset, limit: limit) do
     from(b in BlockedAccount,
       where: is_nil(b.ignored_on),
       limit: ^limit,
       offset: ^offset,
       order_by: [desc: b.inserted_at]
+    )
+    |> Repo.all()
+  end
+
+  def paginate_blocks(q: q, offset: offset, limit: limit) do
+    from(
+      ba in BlockedAccount,
+      where: ilike(ba.did, ^"%#{q}%") or ilike(ba.handle, ^"%#{q}%"),
+      where: is_nil(ba.ignored_on),
+      limit: ^limit,
+      offset: ^offset,
+      order_by: [desc: ba.inserted_at]
     )
     |> Repo.all()
   end
