@@ -206,6 +206,17 @@ defmodule BsShitbotWeb.Dash do
               </p>
             </div>
           </div>
+          <div :if={@current_user && @current_user.admin} class="px-4">
+            <button
+              phx-click="remove-from-list"
+              phx-value-did={block.did}
+              data-confirm="Are you sure?"
+              type="button"
+              class="inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Remove <.icon name="hero-trash" class="w-6" />
+            </button>
+          </div>
         </article>
       </div>
     </div>
@@ -247,6 +258,21 @@ defmodule BsShitbotWeb.Dash do
      |> assign(:q, nil)
      |> stream(:blocks, [], reset: true)
      |> assign_paginate_blocks(1, nil)}
+  end
+
+  def handle_event("remove-from-list", %{"did" => did}, socket) do
+    profile = BlockedAccounts.get_blocked_account_by_did(did)
+    email = BsShitbot.config([:blue_sky, :email])
+    pass = BsShitbot.config([:blue_sky, :pass])
+
+    %{access_jwt: access_key, did: did} =
+      BsShitbot.JWTS.authenticate_with_email(
+        email,
+        pass
+      )
+
+    BsShitbot.BlueskyClient.Lists.mass_remove_users_from_list([profile], access_key, did)
+    {:noreply, socket |> stream_delete(:blocks, profile)}
   end
 
   def handle_event("search", %{"query" => query}, socket) do

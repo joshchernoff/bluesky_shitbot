@@ -9,7 +9,7 @@ defmodule BsShitbot.Users.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
-    # field :admin, :boolean, default: false
+    field :admin, :boolean, default: false
     timestamps(type: :utc_datetime)
   end
 

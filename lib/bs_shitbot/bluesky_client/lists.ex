@@ -72,8 +72,8 @@ defmodule BsShitbot.BlueskyClient.Lists do
     |> handle_batch_response()
   end
 
-  def mass_remove_users_from_list(dids, token, repo) do
-    dids
+  def mass_remove_users_from_list(blocks, token, repo) do
+    blocks
     |> Enum.map(&delete_listitem(token, repo, &1))
     |> handle_batch_response()
   end
@@ -120,9 +120,7 @@ defmodule BsShitbot.BlueskyClient.Lists do
     end
   end
 
-  def delete_listitem(token, repo, did) do
-    %{uri: uri} = blocked = BsShitbot.BlockedAccounts.get_blocked_account_by_did(did)
-
+  def delete_listitem(token, repo, blocked) do
     BsShitbot.BlockedAccounts.update_blocked_account(blocked, %{
       ignored_on: DateTime.utc_now() |> DateTime.truncate(:second)
     })
@@ -133,7 +131,7 @@ defmodule BsShitbot.BlueskyClient.Lists do
       %{
         "repo" => repo,
         "collection" => @listitem_collection,
-        "rkey" => uri |> String.split("/") |> List.last()
+        "rkey" => blocked.uri |> String.split("/") |> List.last()
       }
 
     headers = [{"Authorization", "Bearer #{token}"}]
