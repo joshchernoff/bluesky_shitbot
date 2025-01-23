@@ -17,7 +17,7 @@ defmodule BsShitbotWeb.Dash do
           🚫 Blocking {@total} accounts
         </p>
 
-        <ul role="list" class="divide-y divide-zinc-100 py-6">
+        <ul role="list" class="divide-y divide-zinc-100 pt-6">
           <li class="flex justify-center py-4 font-bold text-lg">
             <span class="flex">
               🤔 How does this bot decide to add accounts to the list?
@@ -38,16 +38,19 @@ defmodule BsShitbotWeb.Dash do
             🔞 Warning The Content on this site by nature is NSFW 🔞
           </li>
 
-          <li class="py-4">
+          <li class="pt-4">
             🧑‍⚖️ Given this is an automated list, it sometimes makes mistakes. 🤷<br />
             If you have been added to the list and wish to appeal, firts check the list again by using the search and locate your account.
             If you don't see your account it's likely because we cought the false positive after adding you and removed you already.
             If you find your account and wish for us to remove you, simply ask the bot at on bluesky.
             <br />
-            <a href="https://bsky.app/profile/bs-shitbot.bsky.social" class="inline-block mt-4">
+            <a
+              href="https://bsky.app/profile/bs-shitbot.bsky.social"
+              class="block md:inline-block mt-4"
+            >
               <button
                 type="button"
-                class="rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                class="w-full rounded-md bg-indigo-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
               >
                 🤖 bs-shitbot.bsky.social
               </button>
@@ -55,11 +58,11 @@ defmodule BsShitbotWeb.Dash do
           </li>
         </ul>
 
-        <div class="mt-2">
+        <div class="mt-6">
           <a class="mr-2" href="https://bsky.app/profile/bs-shitbot.bsky.social/lists/3lfikbvo2n52b">
             <button
               type="button"
-              class="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              class="block w-full md:w-auto md:inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               <.icon name="hero-arrow-right-circle" class="-ml-0.5 size-5" /> Block list here
             </button>
@@ -68,7 +71,7 @@ defmodule BsShitbotWeb.Dash do
           <a class="mr-2" href="https://morphic.pro/payment">
             <button
               type="button"
-              class="inline-flex items-center gap-x-1.5 rounded-md bg-red-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+              class="block w-full md:w-auto md:inline-flex items-center gap-x-1.5 rounded-md bg-red-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
             >
               <.icon name="hero-heart" class="-ml-0.5 size-5" /> Donate to fund project
             </button>
@@ -76,14 +79,14 @@ defmodule BsShitbotWeb.Dash do
           <a href="https://morphic.pro/u/0e9Fu">
             <button
               type="button"
-              class="inline-flex items-center gap-x-1.5 rounded-md bg-zinc-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-zinc-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-600"
+              class="block w-full md:w-auto md:inline-flex items-center gap-x-1.5 rounded-md bg-zinc-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-zinc-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-600"
             >
               <.icon name="hero-code-bracket" class="-ml-0.5 size-5" /> Source Code
             </button>
           </a>
         </div>
 
-        <div class="flex justify-center py-4">
+        <div class="flex justify-center py-6">
           <span class="mr-2">Site Created By:</span>
           <a href="/" data-phx-link="redirect" data-phx-link-state="push" class="flex">
             <svg
@@ -220,11 +223,8 @@ defmodule BsShitbotWeb.Dash do
         </article>
       </div>
     </div>
-    <div :if={@end_of_timeline?} class="mt-5 text-[50px] text-center">
-      🎉 You made it to the beginning of time 🎉
-    </div>
-    <div :if={@streams.blocks.inserts == []} class="text-center mx-auto">
-      Loading Feed... Please wait
+    <div :if={@end_of_timeline?} class="my-8 text-xs text-center">
+      🎉 You made it to the end 🎉
     </div>
     """
   end
@@ -237,6 +237,7 @@ defmodule BsShitbotWeb.Dash do
      socket
      |> assign(page: 1, per_page: 20)
      |> assign(:q, nil)
+     |> stream(:blocks, [])
      |> assign_paginate_blocks(1)
      |> assign(:total, count)}
   end
