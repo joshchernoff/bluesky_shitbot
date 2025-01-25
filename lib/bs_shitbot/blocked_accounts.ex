@@ -17,6 +17,11 @@ defmodule BsShitbot.BlockedAccounts do
     |> Repo.all()
   end
 
+  def get_last_hour_count do
+    from(b in BlockedAccount, where: b.inserted_at >= ago(1, "hour"))
+    |> Repo.aggregate(:count, :id)
+  end
+
   def get_totol_count do
     from(b in BlockedAccount, where: is_nil(b.ignored_on))
     |> Repo.aggregate(:count, :id)
