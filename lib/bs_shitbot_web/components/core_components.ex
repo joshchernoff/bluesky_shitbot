@@ -598,6 +598,17 @@ defmodule BsShitbotWeb.CoreComponents do
   end
 
   ## JS Commands
+  def menu_show(js \\ %JS{}, selector) do
+    JS.show(js,
+      to: selector
+    )
+  end
+
+  def menu_hide(js \\ %JS{}, selector) do
+    JS.hide(js,
+      to: selector
+    )
+  end
 
   def show(js \\ %JS{}, selector) do
     JS.show(js,

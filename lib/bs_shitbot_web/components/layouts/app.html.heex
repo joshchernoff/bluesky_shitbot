@@ -1,6 +1,177 @@
-<main class="px-4 py-20 sm:px-6 lg:px-8">
-  <div class="mx-auto">
-    <.flash_group flash={@flash} />
-    {@inner_content}
-  </div>
-</main>
+<div>
+  <header class="absolute inset-x-0 top-0 z-50">
+    <nav class="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+      <div class="flex lg:flex-1">
+        <.link navigate={~p"/"} class="-m-1.5 p-1.5">
+          <span class="flex items-center content-center">
+            <span class="sr-only">Shitbots & Spam Followers</span>
+            <img src={~p"/images/bot.webp"} class="mr-2 rounded-full w-12 h-12 shadow-xl" />
+            <span class="text-lg font-bold text-gray-900">Shitbots & Spam Followers</span>
+          </span>
+        </.link>
+      </div>
+      <div class="flex lg:hidden">
+        <button
+          phx-click={menu_show("#mobile-menu")}
+          type="button"
+          class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+        >
+          <span class="sr-only">Open main menu</span>
+          <svg
+            class="size-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            aria-hidden="true"
+            data-slot="icon"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="hidden lg:flex lg:gap-x-12">
+        <.link navigate={~p"/feed"} class="text-sm/6 font-semibold text-gray-900">
+          Live Feed
+        </.link>
+        <.link navigate={~p"/about"} class="text-sm/6 font-semibold text-gray-900">About</.link>
+        <a href="https://morphic.pro/payment" class="text-sm/6 font-semibold text-gray-900">
+          Donate
+        </a>
+        <a
+          href="https://github.com/joshchernoff/bluesky_shitbot"
+          class="text-sm/6 font-semibold text-gray-900"
+        >
+          Source
+        </a>
+      </div>
+      <div class="hidden lg:flex lg:flex-1 lg:justify-end gap-x-4">
+        <%= if @current_user do %>
+          {@current_user.email}
+
+          <.link
+            href={~p"/users/settings"}
+            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+          >
+            Settings
+          </.link>
+
+          <.link
+            href={~p"/users/log_out"}
+            method="delete"
+            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+          >
+            Log out
+          </.link>
+        <% else %>
+          <.link
+            href={~p"/users/log_in"}
+            class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+          >
+            Log in <span aria-hidden="true">&rarr;</span>
+          </.link>
+        <% end %>
+      </div>
+    </nav>
+    <div id="mobile-menu" class="hidden lg:hidden" role="dialog" aria-modal="true">
+      <div class="fixed inset-0 z-50"></div>
+      <div class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+        <div class="flex items-center justify-between">
+          <a href="/" class="-m-1.5 p-1.5">
+            <span class="flex items-center content-center">
+              <span class="sr-only">Shitbots & Spam Followers</span>
+              <img src={~p"/images/bot.webp"} class="mr-2 rounded-full w-12 h-12 shadow-xl" />
+              <span class="text-lg font-bold text-gray-900">Shitbots & Spam Followers</span>
+            </span>
+          </a>
+          <button
+            phx-click={menu_hide("#mobile-menu")}
+            type="button"
+            class="-m-2.5 rounded-md p-2.5 text-gray-700"
+          >
+            <span class="sr-only">Close menu</span>
+            <svg
+              class="size-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              aria-hidden="true"
+              data-slot="icon"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="mt-6 flow-root">
+          <div class="-my-6 divide-y divide-gray-500/10">
+            <div class="space-y-2 py-6">
+              <.link
+                navigate={~p"/feed"}
+                class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Live Feed
+              </.link>
+              <.link
+                navigate={~p"/about"}
+                class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                About
+              </.link>
+              <a
+                href="https://morphic.pro/payment"
+                class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Donate
+              </a>
+              <a
+                href="https://github.com/joshchernoff/bluesky_shitbot"
+                class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+              >
+                Source
+              </a>
+            </div>
+            <div class="py-6">
+              <%= if @current_user do %>
+                {@current_user.email}
+
+                <.link
+                  href={~p"/users/settings"}
+                  class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                >
+                  Settings
+                </.link>
+
+                <.link
+                  href={~p"/users/log_out"}
+                  method="delete"
+                  class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                >
+                  Log out
+                </.link>
+              <% else %>
+                <.link
+                  href={~p"/users/log_in"}
+                  class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                >
+                  Log in <span aria-hidden="true">&rarr;</span>
+                </.link>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="px-4 py-20 sm:px-6 lg:px-8">
+    <div class="mx-auto">
+      <.flash_group flash={@flash} />
+      {@inner_content}
+    </div>
+  </main>
+</div>
