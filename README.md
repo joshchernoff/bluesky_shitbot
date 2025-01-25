@@ -1,6 +1,4 @@
 ![](https://shitbot.morphic.pro/images/bot.webp?vsn=d)
-
-Bluesky🦋 accounts: [morphic.pro](https://bsky.app/profile/morphic.pro) | [shitbot](https://bsky.app/profile/bs-shitbot.bsky.social)
 # BlueSky🦋 Shit💩 Bot🤖
 
 I wanted to join BlueSky but found that a large portion of users that are following me are not real and dishonest.
@@ -18,14 +16,3 @@ Given a user is following more than 1k+ accounts but only has 1 post this too is
 In rare cases I’ve seen false positives of users follow 1k+ users but only have 1 post, it's possible but rare.    
 
 The issue with flagging bots after they follow 1k+ users is that the damage is already done.
-
-Roadmap:
-- [x] Automate adding to list if criteria met 
-- [x] Search users handles and DID from webpage
-- [x] Ignore users who have been removed from list from future criteria checks
-- [x] Add user via chat message
-- [x] Remove user via chat message
-- [x] find user via chat message
-- [ ] Allow users to submit appeals that will automatically re-evaluate their account and remove it if they fall outside the flag.  IE new users who finally get some followers.   
-- [ ] Allow users to submit accounts for addition that are not currently in the db.    
-- [ ] Better notification of removal from list.   
