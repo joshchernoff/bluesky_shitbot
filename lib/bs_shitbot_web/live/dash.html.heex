@@ -18,19 +18,27 @@
       </p>
       <div class="mt-10 flex items-center justify-center gap-x-6">
         <a
-          href="#"
+          href="/about"
           class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
           Learn more
         </a>
-        <a href="#" class="text-sm/6 font-semibold text-gray-900">
+        <a
+          href="https://bsky.app/profile/bs-shitbot.bsky.social/lists/3lfikbvo2n52b"
+          class="text-sm/6 font-semibold text-gray-900"
+        >
           Block List <span aria-hidden="true">→</span>
         </a>
       </div>
     </div>
     <div class="flex justify-center py-6">
       <span class="mr-2">Site Created By:</span>
-      <a href="/" data-phx-link="redirect" data-phx-link-state="push" class="flex">
+      <a
+        href="https://morphic.pro"
+        data-phx-link="redirect"
+        data-phx-link-state="push"
+        class="flex"
+      >
         <svg
           class="rotate-180 mr-2 h-6 w-6 object-contain text-zinc-900 fill-current"
           version="1.1"
@@ -74,13 +82,13 @@
     <div class="mx-auto flex max-w-xs flex-col gap-y-4">
       <dt class="text-base/7 text-gray-600">Blocked in the last hour</dt>
       <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-        {@total}
+        {@last_hour}
       </dd>
     </div>
     <div class="mx-auto flex max-w-xs flex-col gap-y-4">
       <dt class="text-base/7 text-gray-600">Total blocked accounts on list</dt>
       <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-        {@last_hour}
+        {@total}
       </dd>
     </div>
   </dl>
